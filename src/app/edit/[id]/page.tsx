@@ -2,7 +2,7 @@
 import FurnitureForm from '@/components/FurnitureForm';
 import { getFurnitureItemById } from '@/lib/data';
 import { notFound, useRouter } from 'next/navigation';
-import { useAuth } from '@/lib/firebase/auth';
+import { useAuth } from '@/lib/firebase/auth.tsx';
 import { useEffect, useState } from 'react';
 import type { Furniture } from '@/lib/types';
 

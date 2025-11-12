@@ -3,7 +3,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/Header';
-import { AuthProvider } from '@/lib/firebase/auth';
+import { AuthProvider } from '@/lib/firebase/auth.tsx';
 
 export const metadata: Metadata = {
   title: 'FurniFind',

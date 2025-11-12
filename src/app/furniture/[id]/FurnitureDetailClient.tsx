@@ -14,7 +14,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import type { Furniture } from '@/lib/types';
-import { useAuth } from '@/lib/firebase/auth';
+import { useAuth } from '@/lib/firebase/auth.tsx';
 
 const ADMIN_EMAIL = "admin@example.com";
 

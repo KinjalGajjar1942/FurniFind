@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { LogIn, LogOut, PlusCircle, User as UserIcon } from 'lucide-react';
-import { useAuth, getFirebaseAuth } from '@/lib/firebase/auth';
+import { useAuth, getFirebaseAuth } from '@/lib/firebase/auth.tsx';
 import { GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
 import {
   DropdownMenu,
