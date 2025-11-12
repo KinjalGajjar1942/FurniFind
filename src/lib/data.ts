@@ -8,9 +8,11 @@ const furnitureData: Furniture[] = [
     id: '1',
     name: 'Plush Velvet Sofa',
     description: 'Experience ultimate comfort with this luxurious green velvet sofa. Its deep cushions and soft upholstery make it the perfect centerpiece for any modern living room.',
-    price: 899.99,
-    imageUrl: PlaceHolderImages[0].imageUrl,
-    imageHint: PlaceHolderImages[0].imageHint,
+    images: [
+        { url: PlaceHolderImages[0].imageUrl, hint: PlaceHolderImages[0].imageHint },
+        { url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=2070&auto=format&fit=crop', hint: 'green sofa side view'},
+        { url: 'https://images.unsplash.com/photo-1608304224888-22345d064c2d?q=80&w=1974&auto=format&fit=crop', hint: 'green sofa detail'},
+    ],
     sellerContact: 'seller1@example.com',
     category: 'Sofas',
   },
@@ -18,9 +20,7 @@ const furnitureData: Furniture[] = [
     id: '2',
     name: 'Solid Oak Dining Table',
     description: 'Host memorable dinners with this beautiful solid oak dining table. Seats up to six people comfortably and is built to last for generations.',
-    price: 649.00,
-    imageUrl: PlaceHolderImages[1].imageUrl,
-    imageHint: PlaceHolderImages[1].imageHint,
+    images: [{ url: PlaceHolderImages[1].imageUrl, hint: PlaceHolderImages[1].imageHint }],
     sellerContact: 'seller2@example.com',
     category: 'Kitchen',
   },
@@ -28,9 +28,7 @@ const furnitureData: Furniture[] = [
     id: '3',
     name: 'Classic Leather Armchair',
     description: 'A timeless piece, this classic brown leather armchair adds a touch of sophistication to any space. Perfect for reading or relaxing.',
-    price: 450.50,
-    imageUrl: PlaceHolderImages[2].imageUrl,
-    imageHint: PlaceHolderImages[2].imageHint,
+    images: [{ url: PlaceHolderImages[2].imageUrl, hint: PlaceHolderImages[2].imageHint }],
     sellerContact: 'seller3@example.com',
     category: 'Sofas',
   },
@@ -38,9 +36,7 @@ const furnitureData: Furniture[] = [
     id: '4',
     name: 'Minimalist Bookshelf',
     description: 'Organize your favorite books and decor on this sleek, minimalist bookshelf. Its dark wood finish complements any modern interior design.',
-    price: 299.00,
-    imageUrl: PlaceHolderImages[3].imageUrl,
-    imageHint: PlaceHolderImages[3].imageHint,
+    images: [{ url: PlaceHolderImages[3].imageUrl, hint: PlaceHolderImages[3].imageHint }],
     sellerContact: 'seller4@example.com',
     category: 'Bedroom',
   },
@@ -48,9 +44,7 @@ const furnitureData: Furniture[] = [
     id: '5',
     name: 'Modern Coffee Table',
     description: 'This modern coffee table features a tempered glass top and a stylish metal frame, offering a light and airy feel to your living area.',
-    price: 199.99,
-    imageUrl: PlaceHolderImages[4].imageUrl,
-    imageHint: PlaceHolderImages[4].imageHint,
+    images: [{ url: PlaceHolderImages[4].imageUrl, hint: PlaceHolderImages[4].imageHint }],
     sellerContact: 'seller5@example.com',
     category: 'Sofas',
   },
@@ -58,9 +52,7 @@ const furnitureData: Furniture[] = [
     id: '6',
     name: 'Rustic King Bed Frame',
     description: 'Bring a touch of nature indoors with this rustic king-size bed frame. Made from reclaimed wood, it provides a sturdy and stylish foundation for a restful night.',
-    price: 799.00,
-    imageUrl: PlaceHolderImages[5].imageUrl,
-    imageHint: PlaceHolderImages[5].imageHint,
+    images: [{ url: PlaceHolderImages[5].imageUrl, hint: PlaceHolderImages[5].imageHint }],
     sellerContact: 'seller6@example.com',
     category: 'Bedroom',
   },
@@ -82,7 +74,7 @@ export const getCategories = (): { name: string, imageUrl: string, imageHint: st
   const categoriesMap = new Map<string, { imageUrl: string; imageHint: string }>();
   furnitureData.forEach((item) => {
     if (!categoriesMap.has(item.category)) {
-      categoriesMap.set(item.category, { imageUrl: item.imageUrl, imageHint: item.imageHint });
+      categoriesMap.set(item.category, { imageUrl: item.images[0].url, imageHint: item.images[0].hint });
     }
   });
 

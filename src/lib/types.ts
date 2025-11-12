@@ -1,10 +1,13 @@
+export interface FurnitureImage {
+  url: string;
+  hint: string;
+}
+
 export interface Furniture {
   id: string;
   name: string;
   description: string;
-  price: number;
-  imageUrl: string;
-  imageHint: string;
+  images: FurnitureImage[];
   sellerContact: string;
   category: string;
 }

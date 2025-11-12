@@ -6,6 +6,8 @@ import { furnitureSchema } from '@/lib/schema';
 import type { z } from 'zod';
 import { handleImageUpload } from '@/ai/flows/handle-image-upload-flow';
 
+// This is a simplified version. In a real app, you'd have a database.
+// We'll also need to adjust the data types to handle multiple images.
 export async function createFurnitureAction(data: z.infer<typeof furnitureSchema>) {
   const validatedFields = furnitureSchema.safeParse(data);
 
@@ -14,6 +16,7 @@ export async function createFurnitureAction(data: z.infer<typeof furnitureSchema
   }
 
   // In a real app, you would insert this data into your database.
+  // This simulation needs to be updated to handle the new `images` array structure
   console.log('Creating new furniture (simulated):', validatedFields.data);
 
   revalidatePath('/');
@@ -28,6 +31,7 @@ export async function updateFurnitureAction(id: string, data: z.infer<typeof fur
   }
   
   // In a real app, you would update the item with this id in your database.
+  // This simulation needs to be updated to handle the new `images` array structure
   console.log(`Updating furniture ${id} (simulated):`, validatedFields.data);
 
   revalidatePath('/');

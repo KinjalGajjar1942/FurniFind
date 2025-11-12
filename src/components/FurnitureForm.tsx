@@ -39,21 +39,22 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
-  const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.imageUrl || null);
+  // We'll need to update this to handle multiple images
+  const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.images[0]?.url || null);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const categories = getCategories();
+  const categories = getCategories().map(c => c.name);
 
   const form = useForm<FurnitureFormValues>({
     resolver: zodResolver(furnitureSchema),
     defaultValues: initialData
       ? {
           ...initialData,
+          imageUrl: initialData.images[0].url, // Prefill with the first image
         }
       : {
           name: '',
           description: '',
-          price: 0,
           imageUrl: '',
           sellerContact: '',
           category: '',
@@ -71,8 +72,8 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
         const result = await handleImageUploadAction(formData);
         if ('imageUrl' in result) {
           form.setValue('imageUrl', result.imageUrl, { shouldValidate: true });
-          // The flow does not return a hint, so we'll leave it empty or you can add a default
-          // form.setValue('imageHint', result.imageHint); 
+          // The form logic needs to be updated to handle an array of images.
+          // For now, we'll just update the first image.
           setImagePreview(result.imageUrl);
         } else {
           toast({
@@ -97,6 +98,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const onSubmit = (values: FurnitureFormValues) => {
     startTransition(async () => {
       try {
+        // The actions need to be updated to handle the new `images` array structure.
         if (initialData) {
           await updateFurnitureAction(initialData.id, values);
           toast({
@@ -220,19 +222,6 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="price"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Price</FormLabel>
-                  <FormControl>
-                    <Input type="number" placeholder="e.g., 899.99" {...field} />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

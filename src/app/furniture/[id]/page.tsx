@@ -8,6 +8,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft, Edit, Mail, Share2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 
 export default function FurnitureDetailPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
@@ -60,19 +67,28 @@ export default function FurnitureDetailPage({ params }: { params: { id: string }
         </Link>
       </Button>
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
-        <div className="aspect-square w-full overflow-hidden rounded-lg shadow-lg">
-          <Image
-            src={furniture.imageUrl}
-            alt={furniture.name}
-            width={600}
-            height={600}
-            className="w-full h-full object-cover"
-            data-ai-hint={furniture.imageHint}
-          />
-        </div>
+        <Carousel className="w-full">
+          <CarouselContent>
+            {furniture.images.map((image, index) => (
+              <CarouselItem key={index}>
+                <div className="aspect-square w-full overflow-hidden rounded-lg shadow-lg">
+                  <Image
+                    src={image.url}
+                    alt={`${furniture.name} - image ${index + 1}`}
+                    width={600}
+                    height={600}
+                    className="w-full h-full object-cover"
+                    data-ai-hint={image.hint}
+                  />
+                </div>
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+          <CarouselPrevious />
+          <CarouselNext />
+        </Carousel>
         <div className="flex flex-col">
           <h1 className="text-4xl font-headline font-bold mb-2">{furniture.name}</h1>
-          <p className="text-3xl font-semibold text-primary mb-6">${furniture.price.toFixed(2)}</p>
           <Separator className="my-2" />
           <p className="text-muted-foreground leading-relaxed my-6 flex-grow">{furniture.description}</p>
           <Separator className="my-2" />
