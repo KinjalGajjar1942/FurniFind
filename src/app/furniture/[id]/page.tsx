@@ -1,17 +1,55 @@
+'use client';
+
 import { getFurnitureItemById } from '@/lib/data';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Mail } from 'lucide-react';
+import { ArrowLeft, Edit, Mail, Share2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { useToast } from '@/hooks/use-toast';
 
 export default function FurnitureDetailPage({ params }: { params: { id: string } }) {
+  const { toast } = useToast();
   const furniture = getFurnitureItemById(params.id);
 
   if (!furniture) {
     notFound();
   }
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: furniture.name,
+          text: `Check out this ${furniture.name}!`,
+          url: window.location.href,
+        });
+      } catch (error) {
+        console.error('Error sharing:', error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not share the item.',
+        });
+      }
+    } else {
+      // Fallback for browsers that do not support the Web Share API
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        toast({
+          title: 'Link Copied!',
+          description: 'The link to this furniture has been copied to your clipboard.',
+        });
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not copy the link.',
+        });
+      }
+    }
+  };
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -45,7 +83,11 @@ export default function FurnitureDetailPage({ params }: { params: { id: string }
                 Contact Seller
               </a>
             </Button>
-            <Button size="lg" variant="secondary" asChild>
+            <Button size="lg" variant="secondary" onClick={handleShare}>
+              <Share2 className="mr-2 h-4 w-4" />
+              Share
+            </Button>
+            <Button size="lg" variant="outline" asChild>
               <Link href={`/edit/${furniture.id}`}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Item
