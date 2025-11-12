@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Edit, Mail, Share2 } from 'lucide-react';
+import { ArrowLeft, Edit, Share2 } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -14,13 +14,9 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import type { Furniture } from '@/lib/types';
-import { useAuth } from '@/lib/firebase/auth';
-
-const ADMIN_EMAIL = "admin@example.com";
 
 export default function FurnitureDetailClient({ furniture }: { furniture: Furniture }) {
   const { toast } = useToast();
-  const { user } = useAuth();
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -54,8 +50,6 @@ export default function FurnitureDetailClient({ furniture }: { furniture: Furnit
       }
     }
   };
-
-  const isAdmin = user && user.email === ADMIN_EMAIL;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -97,14 +91,12 @@ export default function FurnitureDetailClient({ furniture }: { furniture: Furnit
               <Share2 className="mr-2 h-4 w-4" />
               Share
             </Button>
-            {isAdmin && (
-                <Button size="lg" variant="outline" asChild>
-                <Link href={`/edit/${furniture.id}`}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Item
-                </Link>
-                </Button>
-            )}
+            <Button size="lg" variant="outline" asChild>
+            <Link href={`/edit/${furniture.id}`}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Item
+            </Link>
+            </Button>
           </div>
         </div>
       </div>
