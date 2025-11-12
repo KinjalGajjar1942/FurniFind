@@ -1,8 +1,10 @@
 'use client';
 
-import { getAuth, onAuthStateChanged, User, GoogleAuthProvider, signInWithPopup, signOut, Auth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, User, GoogleAuthProvider, signInWithRedirect, signOut, Auth, getRedirectResult } from 'firebase/auth';
 import { firebaseApp } from './config';
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { useToast } from '@/hooks/use-toast';
+
 
 const auth = getAuth(firebaseApp);
 
@@ -25,6 +27,7 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -32,16 +35,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     });
 
+    getRedirectResult(auth).catch((error) => {
+        console.error("Error from redirect result:", error);
+        toast({
+            variant: "destructive",
+            title: "Sign-in Error",
+            description: error.message || "An error occurred during sign-in."
+        });
+    });
+
     return () => unsubscribe();
-  }, []);
+  }, [toast]);
 
   const handleLogin = useCallback(async () => {
     const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error('Error during sign-in:', error);
-    }
+    await signInWithRedirect(auth, provider);
   }, []);
 
   const handleLogout = useCallback(async () => {

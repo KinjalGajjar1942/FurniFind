@@ -35,7 +35,7 @@ export default function Header() {
   }
 
   const renderAuthContent = () => {
-    if (loading || !isClient) {
+    if (!isClient || loading) {
       return <Skeleton className="h-10 w-24" />;
     }
 
