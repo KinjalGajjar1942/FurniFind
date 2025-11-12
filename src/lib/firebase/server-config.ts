@@ -1,7 +1,6 @@
 import 'server-only';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
-
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_KEY!);
+import { serviceAccount } from '@/env';
 
 export function getFirebaseAdminApp() {
     const alreadyCreated = getApps().find(app => app.name === 'firebase-admin');
