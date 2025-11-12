@@ -5,7 +5,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
-import { createFurnitureAction, updateFurnitureAction, handleImageUploadAction } from '@/app/actions';
+import { createFurnitureAction, updateFurnitureAction } from '@/app/actions';
+import { uploadImageAndGetUrl } from '@/lib/firebase/client';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -27,6 +28,7 @@ import Image from 'next/image';
 import { UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ai } from '@/ai/genkit';
 
 type FurnitureFormValues = z.infer<typeof furnitureSchema>;
 
@@ -66,25 +68,30 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
     const file = event.target.files?.[0];
     if (file) {
       setIsUploading(true);
-      const formData = new FormData();
-      formData.append('image', file);
-
       try {
-        const result = await handleImageUploadAction(formData);
-        if ('imageUrl' in result) {
-          const newImage: FurnitureImage = { url: result.imageUrl, hint: result.imageHint };
-          setImagePreviews(prev => [...prev, newImage]);
-        } else {
-          toast({
-            variant: 'destructive',
-            title: 'Upload Failed',
-            description: result.error,
-          });
-        }
+        const imageUrl = await uploadImageAndGetUrl(file);
+
+        // Generate hint using client-side Genkit call
+        const arrayBuffer = await file.arrayBuffer();
+        const base64 = Buffer.from(arrayBuffer).toString('base64');
+        const dataURI = `data:${file.type};base64,${base64}`;
+
+        const hintPrompt = ai.definePrompt({
+          name: 'clientImageHintPrompt',
+          prompt: `Describe the main object in this image in one or two words. {{media url=photoDataUri}}`,
+        });
+    
+        const hintResponse = await hintPrompt({ photoDataUri: dataURI });
+        const imageHint = hintResponse.text.trim().toLowerCase().replace(/\s+/g, ' ') || 'uploaded image';
+
+        const newImage: FurnitureImage = { url: imageUrl, hint: imageHint };
+        setImagePreviews(prev => [...prev, newImage]);
+
       } catch (error) {
+        console.error("Error uploading image:", error);
         toast({
           variant: 'destructive',
-          title: 'Uh oh! Something went wrong.',
+          title: 'Upload Failed',
           description: 'There was a problem with the image upload.',
         });
       } finally {
