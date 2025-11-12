@@ -1,3 +1,40 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "velvet-sofa",
+      "description": "A plush green velvet sofa in a stylish living room.",
+      "imageUrl": "https://images.unsplash.com/photo-1689414126346-b21dfbc308de?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwzfHxncmVlbiUyMHNvZmF8ZW58MHx8fHwxNzYyOTM4NzQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "green sofa"
+    },
+    {
+      "id": "oak-dining-table",
+      "description": "A solid oak dining table with matching chairs.",
+      "imageUrl": "https://images.unsplash.com/photo-1583845112239-97ef1341b271?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxkaW5pbmclMjB0YWJsZXxlbnwwfHx8fDE3NjI4NTQwMzB8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dining table"
+    },
+    {
+      "id": "leather-armchair",
+      "description": "A classic brown leather armchair.",
+      "imageUrl": "https://images.unsplash.com/photo-1643717715201-ff1f1ae191f2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxsZWF0aGVyJTIwYXJtY2hhaXJ8ZW58MHx8fHwxNzYyODk0NDE4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "leather armchair"
+    },
+    {
+      "id": "minimalist-bookshelf",
+      "description": "A sleek, minimalist bookshelf made of dark wood.",
+      "imageUrl": "https://images.unsplash.com/photo-1719310469053-8c5c0c6803d3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxib29rc2hlbGZ8ZW58MHx8fHwxNzYyODQ5NTc0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bookshelf"
+    },
+    {
+      "id": "modern-coffee-table",
+      "description": "A modern coffee table with a glass top and metal frame.",
+      "imageUrl": "https://images.unsplash.com/photo-1614348531934-c338408a46bb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxjb2ZmZWUlMjB0YWJsZXxlbnwwfHx8fDE3NjI5MDEzNTh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "coffee table"
+    },
+    {
+      "id": "rustic-king-bed",
+      "description": "A rustic wooden king-size bed frame.",
+      "imageUrl": "https://images.unsplash.com/photo-1688382575764-8a6a65d3821e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHx3b29kJTIwYmVkfGVufDB8fHx8MTc2MjkxNjI3Nnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "wood bed"
+    }
+  ]
 }
