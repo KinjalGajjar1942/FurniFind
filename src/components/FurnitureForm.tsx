@@ -3,8 +3,8 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
-import { furnitureSchema } from '@/lib/schema';
-import type { Furniture } from '@/lib/types';
+import { furnitureSchema, furnitureImageSchema } from '@/lib/schema';
+import type { Furniture, FurnitureImage } from '@/lib/types';
 import { createFurnitureAction, updateFurnitureAction, handleImageUploadAction } from '@/app/actions';
 
 import { Button } from '@/components/ui/button';
@@ -24,14 +24,12 @@ import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import React from 'react';
 import Image from 'next/image';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getCategories } from '@/lib/data';
 
-// Create a version of the schema without the seller contact for the form
-const formSchema = furnitureSchema.omit({ sellerContact: true });
-type FurnitureFormValues = z.infer<typeof formSchema>;
+type FurnitureFormValues = z.infer<typeof furnitureSchema>;
 
 interface FurnitureFormProps {
   initialData?: Furniture;
@@ -41,26 +39,28 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
-  // We'll need to update this to handle multiple images
-  const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.images[0]?.url || null);
+  const [imagePreviews, setImagePreviews] = React.useState<FurnitureImage[]>(initialData?.images || []);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const categories = getCategories().map(c => c.name);
 
   const form = useForm<FurnitureFormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(furnitureSchema),
     defaultValues: initialData
       ? {
           ...initialData,
-          imageUrl: initialData.images[0].url, // Prefill with the first image
         }
       : {
           name: '',
           description: '',
-          imageUrl: '',
+          images: [],
           category: '',
         },
   });
+
+  React.useEffect(() => {
+    form.setValue('images', imagePreviews);
+  }, [imagePreviews, form]);
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -72,10 +72,8 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
       try {
         const result = await handleImageUploadAction(formData);
         if ('imageUrl' in result) {
-          form.setValue('imageUrl', result.imageUrl, { shouldValidate: true });
-          // The form logic needs to be updated to handle an array of images.
-          // For now, we'll just update the first image.
-          setImagePreview(result.imageUrl);
+          const newImage: FurnitureImage = { url: result.imageUrl, hint: result.imageHint };
+          setImagePreviews(prev => [...prev, newImage]);
         } else {
           toast({
             variant: 'destructive',
@@ -91,15 +89,21 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
         });
       } finally {
         setIsUploading(false);
+        if(fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
       }
     }
+  };
+
+  const removeImage = (index: number) => {
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
 
   const onSubmit = (values: FurnitureFormValues) => {
     startTransition(async () => {
       try {
-        // The actions need to be updated to handle the new `images` array structure.
         if (initialData) {
           await updateFurnitureAction(initialData.id, values);
           toast({
@@ -124,7 +128,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   };
 
   return (
-    <Card className="max-w-2xl mx-auto">
+    <Card className="max-w-4xl mx-auto">
       <CardHeader>
         <CardTitle className="font-headline text-2xl">
           {initialData ? 'Edit Furniture' : 'Add New Furniture'}
@@ -134,45 +138,58 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormItem>
-              <FormLabel>Furniture Image</FormLabel>
-              <FormControl>
-                <div
-                  className={cn(
-                    "relative mt-2 flex justify-center items-center h-64 rounded-lg border-2 border-dashed border-border text-center cursor-pointer hover:border-primary transition-colors",
-                    { 'border-primary': isUploading }
-                  )}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {isUploading ? (
-                     <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-                        <p>Uploading...</p>
-                    </div>
-                  ) : imagePreview ? (
+              <FormLabel>Furniture Images</FormLabel>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {imagePreviews.map((image, index) => (
+                  <div key={index} className="relative group aspect-square">
                     <Image
-                      src={imagePreview}
-                      alt="Preview"
+                      src={image.url}
+                      alt={`Preview ${index + 1}`}
                       fill
-                      className="object-contain rounded-lg p-2"
+                      className="object-cover rounded-lg"
                     />
-                  ) : (
-                    <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                      <UploadCloud className="h-10 w-10" />
-                      <p>Click to upload an image</p>
-                      <p className="text-xs">PNG, JPG, GIF up to 10MB</p>
-                    </div>
-                  )}
-                  <Input
-                    ref={fileInputRef}
-                    type="file"
-                    className="sr-only"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    disabled={isUploading || isPending}
-                  />
-                </div>
-              </FormControl>
-               <FormMessage>{form.formState.errors.imageUrl?.message}</FormMessage>
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeImage(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                 <FormControl>
+                  <div
+                    className={cn(
+                      "relative mt-2 flex justify-center items-center aspect-square rounded-lg border-2 border-dashed border-border text-center cursor-pointer hover:border-primary transition-colors",
+                      { 'border-primary': isUploading }
+                    )}
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                  >
+                    {isUploading ? (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                          <p>Uploading...</p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                        <UploadCloud className="h-10 w-10" />
+                        <p className="text-sm">Click to upload</p>
+                      </div>
+                    )}
+                    <Input
+                      ref={fileInputRef}
+                      type="file"
+                      className="sr-only"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      disabled={isUploading || isPending}
+                    />
+                  </div>
+                </FormControl>
+              </div>
+               <FormMessage>{form.formState.errors.images?.message}</FormMessage>
             </FormItem>
 
             <FormField
