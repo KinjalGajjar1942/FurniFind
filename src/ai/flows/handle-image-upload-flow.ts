@@ -9,6 +9,9 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { getStorage } from 'firebase-admin/storage';
+import { getFirebaseAdminApp } from '@/lib/firebase/server-config';
+import { v4 as uuidv4 } from 'uuid';
 
 const HandleImageUploadInputSchema = z.object({
   photoDataUri: z
@@ -36,10 +39,6 @@ const handleImageUploadFlow = ai.defineFlow(
     outputSchema: HandleImageUploadOutputSchema,
   },
   async (input) => {
-    // In a real app, you would upload the image to a service like Cloud Storage
-    // and get a public URL. For this demo, we'll use a placeholder service.
-    // We'll also use another AI model to get a hint for the image.
-
     const hintPrompt = ai.definePrompt({
         name: 'imageHintPrompt',
         prompt: `Describe the main object in this image in one or two words. {{media url=photoDataUri}}`,
@@ -48,10 +47,27 @@ const handleImageUploadFlow = ai.defineFlow(
     const hintResponse = await hintPrompt({ photoDataUri: input.photoDataUri });
     const imageHint = hintResponse.text.trim().toLowerCase().replace(/\s+/g, ' ');
 
-    // For demonstration, we'll just return a placeholder image URL.
-    // In a real scenario, you would upload the input.photoDataUri to a storage bucket.
-    const seed = new Date().getTime();
-    const imageUrl = `https://picsum.photos/seed/${seed}/600/400`;
+    // Upload image to Firebase Storage
+    const adminApp = getFirebaseAdminApp();
+    const storage = getStorage(adminApp);
+    const bucket = storage.bucket();
+
+    const mimeType = input.photoDataUri.match(/data:(.*);base64,/)?.[1] ?? 'image/jpeg';
+    const fileExtension = mimeType.split('/')[1];
+    const buffer = Buffer.from(input.photoDataUri.split('base64,')[1], 'base64');
+    const fileName = `furniture-images/${uuidv4()}.${fileExtension}`;
+    const file = bucket.file(fileName);
+
+    await file.save(buffer, {
+      metadata: {
+        contentType: mimeType,
+      },
+    });
+
+    const [imageUrl] = await file.getSignedUrl({
+      action: 'read',
+      expires: '03-09-2491', // Far-future expiration date
+    });
 
     return {
       imageUrl,

@@ -14,11 +14,13 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import type { Furniture } from '@/lib/types';
+import { useAuth } from '@/lib/firebase/auth';
 
 const ADMIN_EMAIL = "admin@example.com";
 
 export default function FurnitureDetailClient({ furniture }: { furniture: Furniture }) {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -99,13 +101,14 @@ export default function FurnitureDetailClient({ furniture }: { furniture: Furnit
               <Share2 className="mr-2 h-4 w-4" />
               Share
             </Button>
-            {/* The Edit button will be conditionally rendered once admin auth is in place */}
-            <Button size="lg" variant="outline" asChild>
-              <Link href={`/edit/${furniture.id}`}>
-                <Edit className="mr-2 h-4 w-4" />
-                Edit Item
-              </Link>
-            </Button>
+            {user && (
+                <Button size="lg" variant="outline" asChild>
+                <Link href={`/edit/${furniture.id}`}>
+                    <Edit className="mr-2 h-4 w-4" />
+                    Edit Item
+                </Link>
+                </Button>
+            )}
           </div>
         </div>
       </div>
