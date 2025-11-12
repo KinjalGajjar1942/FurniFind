@@ -3,7 +3,6 @@ import type { Furniture } from '@/lib/types';
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -17,7 +16,7 @@ interface FurnitureCardProps {
 
 export default function FurnitureCard({ furniture, className }: FurnitureCardProps) {
   return (
-    <Card className={cn("overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-1", className)}>
+    <Card className={cn("overflow-hidden transition-all duration-300 group-hover:shadow-lg group-hover:-translate-y-1", className)}>
       <CardHeader className="p-0">
         <div className="aspect-video overflow-hidden">
           <Image
