@@ -3,8 +3,8 @@ import { getCategories } from '@/lib/data';
 import { Card, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 
-export default function Home() {
-  const categories = getCategories();
+export default async function Home() {
+  const categories = await getCategories();
 
   return (
     <div className="container mx-auto px-4 py-12">

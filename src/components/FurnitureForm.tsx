@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
-import { furnitureSchema, furnitureImageSchema } from '@/lib/schema';
+import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
 import { createFurnitureAction, updateFurnitureAction, handleImageUploadAction } from '@/app/actions';
 
@@ -27,13 +27,14 @@ import Image from 'next/image';
 import { UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getCategories } from '@/lib/data';
 
 type FurnitureFormValues = z.infer<typeof furnitureSchema>;
 
 interface FurnitureFormProps {
   initialData?: Furniture;
 }
+
+const categories = ["Sofas", "Kitchen", "Bedroom", "Office", "Outdoor"];
 
 export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const { toast } = useToast();
@@ -42,7 +43,6 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const [imagePreviews, setImagePreviews] = React.useState<FurnitureImage[]>(initialData?.images || []);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const categories = getCategories().map(c => c.name);
 
   const form = useForm<FurnitureFormValues>({
     resolver: zodResolver(furnitureSchema),

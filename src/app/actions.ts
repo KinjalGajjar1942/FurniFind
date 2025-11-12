@@ -5,13 +5,10 @@ import { revalidatePath } from 'next/cache';
 import { furnitureSchema } from '@/lib/schema';
 import type { z } from 'zod';
 import { handleImageUpload } from '@/ai/flows/handle-image-upload-flow';
-import { addFurniture } from '@/lib/firebase/firestore';
+import { addFurniture, updateFurniture } from '@/lib/firebase/firestore';
 
-// A version of the schema that omits the seller contact
 const furnitureActionSchema = furnitureSchema;
 
-// This is a simplified version. In a real app, you'd have a database.
-// We'll also need to adjust the data types to handle multiple images.
 export async function createFurnitureAction(data: z.infer<typeof furnitureActionSchema>) {
   const validatedFields = furnitureActionSchema.safeParse(data);
 
@@ -19,7 +16,6 @@ export async function createFurnitureAction(data: z.infer<typeof furnitureAction
     throw new Error('Invalid furniture data provided.');
   }
 
-  // In a real app, you would insert this data into your database.
   await addFurniture(validatedFields.data);
 
   revalidatePath('/');
@@ -33,9 +29,7 @@ export async function updateFurnitureAction(id: string, data: z.infer<typeof fur
     throw new Error('Invalid furniture data provided.');
   }
   
-  // In a real app, you would update the item with this id in your database.
-  // This simulation needs to be updated to handle the new `images` array structure
-  console.log(`Updating furniture ${id} (simulated):`, validatedFields.data);
+  await updateFurniture(id, validatedFields.data);
 
   revalidatePath('/');
   revalidatePath(`/furniture/${id}`);
