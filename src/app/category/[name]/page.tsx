@@ -10,7 +10,7 @@ import {unstable_setRequestLocale} from 'next-intl/server';
 export function generateStaticParams() {
   const categories = getCategories();
   return categories.map((category) => ({
-    name: category.toLowerCase(),
+    name: category.name.toLowerCase(),
   }));
 }
 
