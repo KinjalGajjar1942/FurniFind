@@ -1,0 +1,93 @@
+{
+  "entities": {
+    "Furniture": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Furniture",
+      "type": "object",
+      "description": "Represents a furniture item listed in the FurniFind app.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Furniture entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the furniture item."
+        },
+        "description": {
+          "type": "string",
+          "description": "A detailed description of the furniture item."
+        },
+        "price": {
+          "type": "number",
+          "description": "The price of the furniture item."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the furniture item's image.",
+          "format": "uri"
+        },
+        "contactInfo": {
+          "type": "string",
+          "description": "Contact information for the seller of the furniture item."
+        },
+        "category": {
+          "type": "string",
+          "description": "Category of the furniture, e.g., 'Sofa', 'Table', 'Chair'."
+        },
+        "dimensions": {
+          "type": "string",
+          "description": "Dimensions of the furniture item."
+        },
+        "material": {
+          "type": "string",
+          "description": "Material of the furniture item."
+        },
+        "condition": {
+          "type": "string",
+          "description": "Condition of the furniture item (e.g., new, used, refurbished)."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description",
+        "price",
+        "imageUrl",
+        "contactInfo",
+        "category"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}/furniture/{furnitureId}",
+        "definition": {
+          "entityName": "Furniture",
+          "schema": {
+            "$ref": "#/backend/entities/Furniture"
+          },
+          "description": "Stores furniture items owned by a specific user. Access is restricted to the owner (userId).",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the furniture item."
+            },
+            {
+              "name": "furnitureId",
+              "description": "The unique identifier of the furniture item."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed to securely manage furniture listings, focusing on ownership and clear authorization. Each user has a dedicated collection for their furniture listings, ensuring private access by default. This approach leverages path-based ownership, simplifying security rules and eliminating the need for complex authorization logic. \n\n**Authorization Independence:** Authorization is achieved through path-based ownership, eliminating `get()` calls in security rules. Each furniture item is stored under `/users/{userId}/furniture/{furnitureId}`, so the security rules can simply check if `request.auth.uid == userId`.\n\n**QAPs (Rules are not Filters):** The structure enables secure `list` operations. A user can only list furniture items in their own `/users/{userId}/furniture` collection. To allow listing of all furniture (e.g. for a global search), a separate collection (e.g. `/public_furniture`) would be required with denormalized data, and its own security rules.\n\nThis design enforces clear ownership invariants, supports atomic operations (transactions/batches), and promotes ease of debugging."
+  }
+}

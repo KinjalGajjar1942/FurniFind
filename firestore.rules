@@ -1,0 +1,73 @@
+/**
+ * @description This ruleset enforces a strict user-ownership model for furniture listings in the FurniFind app.
+ * Data is nested under /users/{userId}/furniture/{furnitureId}, providing clear ownership boundaries.
+ *
+ * @dataStructure
+ * All data is nested under /users/{userId}/furniture/{furnitureId}. This hierarchical structure ensures that
+ * furniture items are directly associated with their respective owners.
+ *
+ * @keySecurityDecisions
+ * - User listing is disallowed for privacy.
+ * - Default security posture for ambiguous relationships is strict owner-only access.
+ * - Authorization is enforced by verifying the user ID in the path against the authenticated user's UID.
+ * - Denormalization for Authorization: The design avoids the need for `get()` calls by enforcing ownership via path.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Enforces that only the owner can read, create, update, or delete furniture items.
+     * @path /users/{userId}/furniture/{furnitureId}
+     * @allow (create) - User 'user_abc' creates a new furniture item with ID 'furniture_123' under their own user ID.
+     *   - request.auth.uid: 'user_abc'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @allow (get) - User 'user_abc' reads a furniture item with ID 'furniture_123' under their own user ID.
+     *   - request.auth.uid: 'user_abc'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @allow (update) - User 'user_abc' updates a furniture item with ID 'furniture_123' under their own user ID.
+     *   - request.auth.uid: 'user_abc'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @allow (delete) - User 'user_abc' deletes a furniture item with ID 'furniture_123' under their own user ID.
+     *   - request.auth.uid: 'user_abc'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @deny (create) - User 'user_xyz' attempts to create a furniture item under user ID 'user_abc'.
+     *   - request.auth.uid: 'user_xyz'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @deny (get) - User 'user_xyz' attempts to read a furniture item under user ID 'user_abc'.
+     *   - request.auth.uid: 'user_xyz'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @deny (update) - User 'user_xyz' attempts to update a furniture item under user ID 'user_abc'.
+     *   - request.auth.uid: 'user_xyz'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @deny (delete) - User 'user_xyz' attempts to delete a furniture item under user ID 'user_abc'.
+     *   - request.auth.uid: 'user_xyz'
+     *   - path: /users/user_abc/furniture/furniture_123
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
+     */
+    match /users/{userId}/furniture/{furnitureId} {
+      // ----- Read Permissions -----
+      allow get: if isSignedIn() && isOwner(userId);
+      allow list: if isSignedIn() && isOwner(userId);
+
+      // ----- Write Permissions -----
+      allow create: if isSignedIn() && isOwner(userId);
+      allow update: if isSignedIn() && isExistingOwner(userId);
+      allow delete: if isSignedIn() && isExistingOwner(userId);
+    }
+  }
+
+  // ----- Helper Functions -----
+  function isSignedIn() {
+    return request.auth != null;
+  }
+
+  function isOwner(userId) {
+    return request.auth.uid == userId;
+  }
+
+    //CRITICAL - helper function to ensure the document exists before allowing any destructive operations
+  function isExistingOwner(userId) {
+    return isOwner(userId) && resource != null;
+  }
+}
