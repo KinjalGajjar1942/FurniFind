@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useForm } from 'react-hook-form';
@@ -7,6 +8,7 @@ import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
 import { createFurnitureAction, updateFurnitureAction, generateImageHintAction } from '@/app/actions';
 import { uploadImageAndGetUrl } from '@/lib/firebase/client';
+import { useAuth } from '@/components/AuthProvider';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +30,7 @@ import Image from 'next/image';
 import { UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 type FurnitureFormValues = z.infer<typeof furnitureSchema>;
 
@@ -38,6 +41,7 @@ interface FurnitureFormProps {
 const categories = ["Sofas", "Kitchen", "Bedroom", "Office", "Outdoor"];
 
 export default function FurnitureForm({ initialData }: FurnitureFormProps) {
+  const { user } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = React.useTransition();
@@ -65,12 +69,12 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && user) {
       setIsUploading(true);
       try {
-        const imageUrl = await uploadImageAndGetUrl(file);
+        // We need the user's ID for the upload path now.
+        const imageUrl = await uploadImageAndGetUrl(file, user.uid);
 
-        // Generate hint using a server action
         const arrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString('base64');
         const dataURI = `data:${file.type};base64,${base64}`;
@@ -85,7 +89,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
         toast({
           variant: 'destructive',
           title: 'Upload Failed',
-          description: 'There was a problem with the image upload.',
+          description: 'There was a problem with the image upload. You may need to check storage rules.',
         });
       } finally {
         setIsUploading(false);
@@ -102,6 +106,14 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
 
 
   const onSubmit = (values: FurnitureFormValues) => {
+    if (!user) {
+        toast({
+            variant: 'destructive',
+            title: 'Authentication Error',
+            description: 'You must be logged in to save furniture.',
+        });
+        return;
+    }
     startTransition(async () => {
       try {
         if (initialData) {
@@ -126,6 +138,19 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
       }
     });
   };
+
+  if (!user) {
+    return (
+        <div className="max-w-4xl mx-auto py-12">
+            <Alert variant="destructive">
+                <AlertTitle>Authentication Required</AlertTitle>
+                <AlertDescription>
+                You must be logged in to add or edit furniture. Please sign in using the button in the header.
+                </AlertDescription>
+            </Alert>
+        </div>
+    )
+  }
 
   return (
     <Card className="max-w-4xl mx-auto">
