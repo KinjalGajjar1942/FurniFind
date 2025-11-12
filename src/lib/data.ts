@@ -78,7 +78,17 @@ export const getFurnitureItemsByCategory = (category: string): Furniture[] => {
   return furnitureData.filter((item) => item.category.toLowerCase() === category.toLowerCase());
 };
 
-export const getCategories = (): string[] => {
-  const categories = furnitureData.map((item) => item.category);
-  return [...new Set(categories)];
+export const getCategories = (): { name: string, imageUrl: string, imageHint: string }[] => {
+  const categoriesMap = new Map<string, { imageUrl: string; imageHint: string }>();
+  furnitureData.forEach((item) => {
+    if (!categoriesMap.has(item.category)) {
+      categoriesMap.set(item.category, { imageUrl: item.imageUrl, imageHint: item.imageHint });
+    }
+  });
+
+  return Array.from(categoriesMap.entries()).map(([name, { imageUrl, imageHint }]) => ({
+    name,
+    imageUrl,
+    imageHint,
+  }));
 };

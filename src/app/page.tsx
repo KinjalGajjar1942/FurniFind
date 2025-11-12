@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getCategories } from '@/lib/data';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowRight } from 'lucide-react';
+import { Card, CardTitle } from '@/components/ui/card';
+import Image from 'next/image';
 
 export default function Home() {
   const categories = getCategories();
@@ -13,17 +13,19 @@ export default function Home() {
       </h1>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
         {categories.map((category) => (
-          <Link key={category} href={`/category/${category.toLowerCase()}`} className="group">
-             <Card className="overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-2 h-full flex flex-col">
-                <CardHeader>
-                    <CardTitle className="font-headline text-3xl text-center">{category}</CardTitle>
-                </CardHeader>
-                <CardContent className="flex-grow flex justify-center items-center">
-                    <div className="flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
-                        <span className="text-lg">View Products</span>
-                        <ArrowRight className="ml-2 h-5 w-5 transform transition-transform group-hover:translate-x-1" />
-                    </div>
-                </CardContent>
+          <Link key={category.name} href={`/category/${category.name.toLowerCase()}`} className="group">
+             <Card className="overflow-hidden transition-all duration-300 group-hover:shadow-xl group-hover:-translate-y-2 h-full flex flex-col aspect-video relative">
+                <Image
+                  src={category.imageUrl}
+                  alt={category.name}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  data-ai-hint={category.imageHint}
+                />
+                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
+                <div className="relative flex flex-col h-full items-center justify-center p-6">
+                    <CardTitle className="font-headline text-4xl text-white text-center drop-shadow-lg">{category.name}</CardTitle>
+                </div>
              </Card>
           </Link>
         ))}
