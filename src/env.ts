@@ -17,12 +17,23 @@ const serviceAccountSchema = z.object({
 const envSchema = z.object({
   FIREBASE_SERVICE_ACCOUNT_KEY: z.string().transform((str, ctx) => {
     try {
-      return serviceAccountSchema.parse(JSON.parse(str));
+      // The service account key is a JSON string, so we need to parse it.
+      // It may have single quotes, so we replace them with double quotes.
+      const parsed = JSON.parse(str.replace(/'/g, '"'));
+      return serviceAccountSchema.parse(parsed);
     } catch (e) {
-      ctx.addIssue({ code: 'custom', message: 'Invalid service account key' });
+      console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:", e);
+      ctx.addIssue({ code: 'custom', message: 'Invalid service account key JSON.' });
       return z.NEVER;
     }
   }),
+  NEXT_PUBLIC_FIREBASE_API_KEY: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_PROJECT_ID: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1),
+  NEXT_PUBLIC_FIREBASE_APP_ID: z.string().min(1),
+  GEMINI_API_KEY: z.string().optional(),
 });
 
 const parsedEnv = envSchema.safeParse(process.env);
@@ -35,4 +46,5 @@ if (!parsedEnv.success) {
   throw new Error('Invalid environment variables.');
 }
 
+export const env = parsedEnv.data;
 export const serviceAccount = parsedEnv.data.FIREBASE_SERVICE_ACCOUNT_KEY;
