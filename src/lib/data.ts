@@ -13,7 +13,6 @@ const furnitureData: Furniture[] = [
         { url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?q=80&w=2070&auto=format&fit=crop', hint: 'green sofa side view'},
         { url: 'https://images.unsplash.com/photo-1608304224888-22345d064c2d?q=80&w=1974&auto=format&fit=crop', hint: 'green sofa detail'},
     ],
-    sellerContact: 'seller1@example.com',
     category: 'Sofas',
   },
   {
@@ -21,7 +20,6 @@ const furnitureData: Furniture[] = [
     name: 'Solid Oak Dining Table',
     description: 'Host memorable dinners with this beautiful solid oak dining table. Seats up to six people comfortably and is built to last for generations.',
     images: [{ url: PlaceHolderImages[1].imageUrl, hint: PlaceHolderImages[1].imageHint }],
-    sellerContact: 'seller2@example.com',
     category: 'Kitchen',
   },
   {
@@ -29,7 +27,6 @@ const furnitureData: Furniture[] = [
     name: 'Classic Leather Armchair',
     description: 'A timeless piece, this classic brown leather armchair adds a touch of sophistication to any space. Perfect for reading or relaxing.',
     images: [{ url: PlaceHolderImages[2].imageUrl, hint: PlaceHolderImages[2].imageHint }],
-    sellerContact: 'seller3@example.com',
     category: 'Sofas',
   },
   {
@@ -37,7 +34,6 @@ const furnitureData: Furniture[] = [
     name: 'Minimalist Bookshelf',
     description: 'Organize your favorite books and decor on this sleek, minimalist bookshelf. Its dark wood finish complements any modern interior design.',
     images: [{ url: PlaceHolderImages[3].imageUrl, hint: PlaceHolderImages[3].imageHint }],
-    sellerContact: 'seller4@example.com',
     category: 'Bedroom',
   },
   {
@@ -45,7 +41,6 @@ const furnitureData: Furniture[] = [
     name: 'Modern Coffee Table',
     description: 'This modern coffee table features a tempered glass top and a stylish metal frame, offering a light and airy feel to your living area.',
     images: [{ url: PlaceHolderImages[4].imageUrl, hint: PlaceHolderImages[4].imageHint }],
-    sellerContact: 'seller5@example.com',
     category: 'Sofas',
   },
   {
@@ -53,7 +48,6 @@ const furnitureData: Furniture[] = [
     name: 'Rustic King Bed Frame',
     description: 'Bring a touch of nature indoors with this rustic king-size bed frame. Made from reclaimed wood, it provides a sturdy and stylish foundation for a restful night.',
     images: [{ url: PlaceHolderImages[5].imageUrl, hint: PlaceHolderImages[5].imageHint }],
-    sellerContact: 'seller6@example.com',
     category: 'Bedroom',
   },
 ];

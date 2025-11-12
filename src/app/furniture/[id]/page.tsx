@@ -16,6 +16,8 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 
+const ADMIN_EMAIL = "admin@example.com";
+
 export default function FurnitureDetailPage({ params }: { params: { id: string } }) {
   const { toast } = useToast();
   const furniture = getFurnitureItemById(params.id);
@@ -94,21 +96,22 @@ export default function FurnitureDetailPage({ params }: { params: { id: string }
           <Separator className="my-2" />
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
             <Button size="lg" asChild>
-              <a href={`mailto:${furniture.sellerContact}`}>
+              <a href={`mailto:${ADMIN_EMAIL}?subject=Inquiry about ${furniture.name}`}>
                 <Mail className="mr-2 h-4 w-4" />
-                Contact Seller
+                Contact Admin
               </a>
             </Button>
             <Button size="lg" variant="secondary" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" />
               Share
             </Button>
-            <Button size="lg" variant="outline" asChild>
+            {/* The Edit button will be conditionally rendered once admin auth is in place */}
+            {/* <Button size="lg" variant="outline" asChild>
               <Link href={`/edit/${furniture.id}`}>
                 <Edit className="mr-2 h-4 w-4" />
                 Edit Item
               </Link>
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

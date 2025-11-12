@@ -8,6 +8,5 @@ export interface Furniture {
   name: string;
   description: string;
   images: FurnitureImage[];
-  sellerContact: string;
   category: string;
 }

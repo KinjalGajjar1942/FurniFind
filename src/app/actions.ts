@@ -6,10 +6,13 @@ import { furnitureSchema } from '@/lib/schema';
 import type { z } from 'zod';
 import { handleImageUpload } from '@/ai/flows/handle-image-upload-flow';
 
+// A version of the schema that omits the seller contact
+const furnitureActionSchema = furnitureSchema.omit({ sellerContact: true });
+
 // This is a simplified version. In a real app, you'd have a database.
 // We'll also need to adjust the data types to handle multiple images.
-export async function createFurnitureAction(data: z.infer<typeof furnitureSchema>) {
-  const validatedFields = furnitureSchema.safeParse(data);
+export async function createFurnitureAction(data: z.infer<typeof furnitureActionSchema>) {
+  const validatedFields = furnitureActionSchema.safeParse(data);
 
   if (!validatedFields.success) {
     throw new Error('Invalid furniture data provided.');
@@ -23,8 +26,8 @@ export async function createFurnitureAction(data: z.infer<typeof furnitureSchema
   redirect('/');
 }
 
-export async function updateFurnitureAction(id: string, data: z.infer<typeof furnitureSchema>) {
-  const validatedFields = furnitureSchema.safeParse(data);
+export async function updateFurnitureAction(id: string, data: z.infer<typeof furnitureActionSchema>) {
+  const validatedFields = furnitureActionSchema.safeParse(data);
 
   if (!validatedFields.success) {
     throw new Error('Invalid furniture data provided.');

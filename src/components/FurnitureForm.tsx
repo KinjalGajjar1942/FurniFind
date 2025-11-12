@@ -29,7 +29,9 @@ import { cn } from '@/lib/utils';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { getCategories } from '@/lib/data';
 
-type FurnitureFormValues = z.infer<typeof furnitureSchema>;
+// Create a version of the schema without the seller contact for the form
+const formSchema = furnitureSchema.omit({ sellerContact: true });
+type FurnitureFormValues = z.infer<typeof formSchema>;
 
 interface FurnitureFormProps {
   initialData?: Furniture;
@@ -46,7 +48,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const categories = getCategories().map(c => c.name);
 
   const form = useForm<FurnitureFormValues>({
-    resolver: zodResolver(furnitureSchema),
+    resolver: zodResolver(formSchema),
     defaultValues: initialData
       ? {
           ...initialData,
@@ -56,7 +58,6 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
           name: '',
           description: '',
           imageUrl: '',
-          sellerContact: '',
           category: '',
         },
   });
@@ -222,19 +223,6 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
                       ))}
                     </SelectContent>
                   </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="sellerContact"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Seller Contact Email</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="you@example.com" {...field} />
-                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
