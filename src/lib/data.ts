@@ -12,6 +12,7 @@ const furnitureData: Furniture[] = [
     imageUrl: PlaceHolderImages[0].imageUrl,
     imageHint: PlaceHolderImages[0].imageHint,
     sellerContact: 'seller1@example.com',
+    category: 'Sofas',
   },
   {
     id: '2',
@@ -21,6 +22,7 @@ const furnitureData: Furniture[] = [
     imageUrl: PlaceHolderImages[1].imageUrl,
     imageHint: PlaceHolderImages[1].imageHint,
     sellerContact: 'seller2@example.com',
+    category: 'Kitchen',
   },
   {
     id: '3',
@@ -30,6 +32,7 @@ const furnitureData: Furniture[] = [
     imageUrl: PlaceHolderImages[2].imageUrl,
     imageHint: PlaceHolderImages[2].imageHint,
     sellerContact: 'seller3@example.com',
+    category: 'Sofas',
   },
   {
     id: '4',
@@ -39,6 +42,7 @@ const furnitureData: Furniture[] = [
     imageUrl: PlaceHolderImages[3].imageUrl,
     imageHint: PlaceHolderImages[3].imageHint,
     sellerContact: 'seller4@example.com',
+    category: 'Bedroom',
   },
   {
     id: '5',
@@ -48,6 +52,7 @@ const furnitureData: Furniture[] = [
     imageUrl: PlaceHolderImages[4].imageUrl,
     imageHint: PlaceHolderImages[4].imageHint,
     sellerContact: 'seller5@example.com',
+    category: 'Sofas',
   },
   {
     id: '6',
@@ -57,6 +62,7 @@ const furnitureData: Furniture[] = [
     imageUrl: PlaceHolderImages[5].imageUrl,
     imageHint: PlaceHolderImages[5].imageHint,
     sellerContact: 'seller6@example.com',
+    category: 'Bedroom',
   },
 ];
 
@@ -66,4 +72,13 @@ export const getFurnitureItems = (): Furniture[] => {
 
 export const getFurnitureItemById = (id: string): Furniture | undefined => {
   return furnitureData.find((item) => item.id === id);
+};
+
+export const getFurnitureItemsByCategory = (category: string): Furniture[] => {
+  return furnitureData.filter((item) => item.category.toLowerCase() === category.toLowerCase());
+};
+
+export const getCategories = (): string[] => {
+  const categories = furnitureData.map((item) => item.category);
+  return [...new Set(categories)];
 };

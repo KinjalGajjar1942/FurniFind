@@ -26,6 +26,8 @@ import React from 'react';
 import Image from 'next/image';
 import { UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getCategories } from '@/lib/data';
 
 type FurnitureFormValues = z.infer<typeof furnitureSchema>;
 
@@ -40,6 +42,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const [imagePreview, setImagePreview] = React.useState<string | null>(initialData?.imageUrl || null);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const categories = getCategories();
 
   const form = useForm<FurnitureFormValues>({
     resolver: zodResolver(furnitureSchema),
@@ -53,6 +56,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
           price: 0,
           imageUrl: '',
           sellerContact: '',
+          category: '',
         },
   });
 
@@ -194,6 +198,28 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
                       {...field}
                     />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories.map((category) => (
+                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}

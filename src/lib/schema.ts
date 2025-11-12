@@ -6,4 +6,5 @@ export const furnitureSchema = z.object({
   price: z.coerce.number().positive({ message: 'Price must be a positive number.' }),
   imageUrl: z.string().url({ message: 'Please enter a valid image URL.' }),
   sellerContact: z.string().email({ message: 'Please enter a valid email address.' }),
+  category: z.string().min(3, { message: 'Category must be at least 3 characters long.' }),
 });

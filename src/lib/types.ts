@@ -6,4 +6,5 @@ export interface Furniture {
   imageUrl: string;
   imageHint: string;
   sellerContact: string;
+  category: string;
 }
