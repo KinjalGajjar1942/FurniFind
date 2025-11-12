@@ -14,7 +14,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import type { Furniture } from '@/lib/types';
-import { useAuth } from '@/lib/firebase/auth.tsx';
+import { useAuth } from '@/lib/firebase/auth';
 
 const ADMIN_EMAIL = "admin@example.com";
 
@@ -55,6 +55,8 @@ export default function FurnitureDetailClient({ furniture }: { furniture: Furnit
     }
   };
 
+  const isAdmin = user && user.email === ADMIN_EMAIL;
+
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
       <Button asChild variant="ghost" className="mb-8">
@@ -91,17 +93,11 @@ export default function FurnitureDetailClient({ furniture }: { furniture: Furnit
           <p className="text-muted-foreground leading-relaxed my-6 flex-grow">{furniture.description}</p>
           <Separator className="my-4" />
           <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <Button size="lg" asChild>
-              <a href={`mailto:${ADMIN_EMAIL}?subject=Inquiry about ${furniture.name}`}>
-                <Mail className="mr-2 h-4 w-4" />
-                Contact Admin
-              </a>
-            </Button>
             <Button size="lg" variant="secondary" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" />
               Share
             </Button>
-            {user && (
+            {isAdmin && (
                 <Button size="lg" variant="outline" asChild>
                 <Link href={`/edit/${furniture.id}`}>
                     <Edit className="mr-2 h-4 w-4" />
