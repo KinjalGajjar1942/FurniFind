@@ -1,9 +1,12 @@
 
 'use client';
-import { firebaseApp } from './config';
+import { initializeApp, getApps } from 'firebase/app';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { v4 as uuidv4 } from 'uuid';
+import { firebaseConfig } from './config';
 
+// Initialize Firebase
+const firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 const storage = getStorage(firebaseApp);
 
 export async function uploadImageAndGetUrl(file: File): Promise<string> {
