@@ -2,6 +2,7 @@
 'server-only';
 import { initializeApp, getApps, cert } from 'firebase-admin/app';
 import { serviceAccount } from '@/env';
+import { firebaseConfig } from '@/firebase/config';
 
 export function getFirebaseAdminApp() {
     const alreadyCreated = getApps().find(app => app.name === 'firebase-admin');
@@ -9,10 +10,10 @@ export function getFirebaseAdminApp() {
         return alreadyCreated;
     }
 
-    // Use the environment variable for the storage bucket, which is reliable on the server.
-    const storageBucket = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+    // Use the hardcoded config value for the storage bucket.
+    const storageBucket = firebaseConfig.storageBucket;
     if (!storageBucket) {
-        throw new Error("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET environment variable is not set.");
+        throw new Error("Firebase storageBucket is not defined in src/firebase/config.ts");
     }
 
     return initializeApp(
@@ -23,4 +24,3 @@ export function getFirebaseAdminApp() {
         'firebase-admin'
     );
 }
-
