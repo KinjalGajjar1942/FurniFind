@@ -1,13 +1,19 @@
 
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow public read and write access to all documents.
-    // This is suitable for a single-user admin app but would need to be
-    // secured with authentication rules for a multi-user app.
     match /{document=**} {
-      allow read, write: if true;
+      allow read, write: if false;
+    }
+    
+    match /categories/{category} {
+      allow read: if true;
+    }
+
+    match /furniture/{furnitureId} {
+      allow read: if true;
+      allow create: if request.auth != null && request.resource.data.name is string && request.resource.data.description is string && request.resource.data.category is string && request.resource.data.images is list && request.resource.data.images.size() <= 10;
+      allow update: if request.auth != null && request.resource.data.name is string && request.resource.data.description is string && request.resource.data.category is string && request.resource.data.images is list && request.resource.data.images.size() <= 10;
     }
   }
 }

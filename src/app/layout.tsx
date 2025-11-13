@@ -4,7 +4,7 @@ import './globals.css';
 import { cn } from '@/lib/utils';
 import { Toaster } from '@/components/ui/toaster';
 import Header from '@/components/Header';
-import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { FirebaseProvider } from '@/firebase/provider';
 
 export const metadata: Metadata = {
   title: 'FurniFind',
@@ -27,17 +27,18 @@ export default function RootLayout({
         />
       </head>
       <body
+        suppressHydrationWarning={true}
         className={cn(
           'min-h-screen bg-background font-body antialiased'
         )}
       >
-        <FirebaseClientProvider>
+        <FirebaseProvider>
           <div className="relative flex min-h-screen flex-col">
             <Header />
             <main className="flex-1">{children}</main>
           </div>
           <Toaster />
-        </FirebaseClientProvider>
+        </FirebaseProvider>
       </body>
     </html>
   );

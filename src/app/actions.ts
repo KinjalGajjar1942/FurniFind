@@ -6,6 +6,8 @@ import { getStorage } from 'firebase-admin/storage';
 import { getFirebaseAdminApp } from '@/lib/firebase/server-config';
 import { headers } from 'next/headers';
 import { seedCategories } from '@/lib/seed';
+import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function generateImageHintAction(photoDataUri: string): Promise<string> {
   const hintPrompt = ai.definePrompt({
@@ -20,6 +22,30 @@ export async function generateImageHintAction(photoDataUri: string): Promise<str
     console.error("Error generating image hint:", error);
     return 'furniture'; // Fallback hint
   }
+}
+
+export async function uploadImageAction(formData: FormData): Promise<string> {
+  const file = formData.get('file') as File;
+  if (!file) {
+    throw new Error('No file provided');
+  }
+
+  const supabase = createSupabaseServerClient();
+  const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const { data, error } = await supabase.storage
+    .from('uploads')
+    .upload(`public/${uuidv4()}-${cleanFileName}`, file);
+
+  if (error) {
+    console.error('Supabase upload error:', error);
+    throw new Error(`Error uploading image to Supabase storage: ${error.message}`);
+  }
+
+  const { data: publicUrlData } = supabase.storage
+    .from('uploads')
+    .getPublicUrl(data.path);
+
+  return publicUrlData.publicUrl;
 }
 
 export async function fixCorsAction() {

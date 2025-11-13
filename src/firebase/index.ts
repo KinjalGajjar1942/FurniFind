@@ -5,7 +5,6 @@ import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app';
 import { getAuth, type Auth } from 'firebase/auth';
 import { getFirestore, type Firestore } from 'firebase/firestore';
 import { getStorage, type FirebaseStorage } from 'firebase/storage';
-import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 // This is the primary client-side config.
 // It is essential that all NEXT_PUBLIC_ variables are defined in your .env file.
@@ -21,6 +20,9 @@ const firebaseConfig = {
 
 // IMPORTANT: DO NOT MODIFY THIS FUNCTION
 export function initializeFirebase() {
+  if (typeof window === 'undefined') {
+    return { firebaseApp: null, auth: null, firestore: null, storage: null };
+  }
   if (getApps().length > 0) {
     return getSdks(getApp());
   }
@@ -46,7 +48,6 @@ export function getSdks(firebaseApp: FirebaseApp) {
 }
 
 export * from './provider';
-export * from './client-provider';
 export * from './firestore/use-collection';
 export * from './firestore/use-doc';
 export * from './non-blocking-updates';

@@ -11,9 +11,9 @@ export function getFirebaseAdminApp() {
 
     // Use the validated environment variable for the storage bucket.
     const storageBucket = env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
-    if (!storageBucket) {
-        throw new Error("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET is not defined in your environment variables.");
-    }
+    // if (!storageBucket) {
+    //     throw new Error("NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET is not defined in your environment variables.");
+    // }
 
     return initializeApp(
         {

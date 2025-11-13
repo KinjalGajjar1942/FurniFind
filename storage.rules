@@ -1,14 +1,9 @@
 
 rules_version = '2';
-
 service firebase.storage {
   match /b/{bucket}/o {
-    // Allow public read and write access to all files.
-    // This allows anyone to upload images, which is suitable for this
-    // single-user admin app. For a multi-user app, you would
-    // restrict write access to authenticated users.
     match /{allPaths=**} {
-      allow read, write: if true;
+      allow read, write: if request.auth != null;
     }
   }
 }

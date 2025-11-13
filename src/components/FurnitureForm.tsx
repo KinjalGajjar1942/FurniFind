@@ -6,12 +6,11 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
-import { generateImageHintAction } from '@/app/actions';
-import { addFurniture, updateFurniture, uploadImageAndGetUrl } from '@/lib/firebase/client';
+import { generateImageHintAction, uploadImageAction } from '@/app/actions';
+import { addFurniture, updateFurniture } from '@/lib/firebase/client';
+import { useFirestore, useMemoFirebase } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import { useFirebase, useFirestore, useMemoFirebase } from '@/firebase';
-import { collection, type Firestore } from 'firebase/firestore';
-import type { FirebaseStorage } from 'firebase/storage';
+import { collection } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -54,7 +53,6 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const firestore = useFirestore();
-  const { storage } = useFirebase();
   const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
@@ -78,15 +76,17 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && storage) {
+    if (file) {
       setIsUploading(true);
       try {
-        const imageUrl = await uploadImageAndGetUrl(storage, file);
+        const formData = new FormData();
+        formData.append('file', file);
+        const imageUrl = await uploadImageAction(formData);
 
         const arrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString('base64');
         const dataURI = `data:${file.type};base64,${base64}`;
-        
+
         const imageHint = await generateImageHintAction(dataURI);
 
         const newImage: FurnitureImage = { url: imageUrl, hint: imageHint };
