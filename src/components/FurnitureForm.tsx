@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
-import { generateImageHintAction, uploadImageAction } from '@/app/actions';
-import { addFurniture, updateFurniture } from '@/lib/firebase/client';
-import { useFirestore, useMemoFirebase } from '@/firebase';
+import { generateImageHintAction } from '@/app/actions';
+import { addFurniture, updateFurniture, uploadImageAndGetUrl } from '@/lib/firebase/client';
+import { useFirestore, useMemoFirebase, useStorage } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection } from 'firebase/firestore';
 
@@ -53,6 +53,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const firestore = useFirestore();
+  const storage = useStorage();
   const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
@@ -76,12 +77,10 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && storage) {
       setIsUploading(true);
       try {
-        const formData = new FormData();
-        formData.append('file', file);
-        const imageUrl = await uploadImageAction(formData);
+        const imageUrl = await uploadImageAndGetUrl(storage, file);
 
         const arrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString('base64');
@@ -143,6 +142,8 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
       }
     });
   };
+  
+  const isDataLoading = !firestore || isLoadingCategories;
 
   return (
     <Card className="max-w-4xl mx-auto">
@@ -180,11 +181,15 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
                   <div
                     className={cn(
                       "relative mt-2 flex justify-center items-center aspect-square rounded-lg border-2 border-dashed border-border text-center cursor-pointer hover:border-primary transition-colors",
-                      { 'border-primary': isUploading }
+                      { 'border-primary': isUploading, 'cursor-not-allowed opacity-50': !storage }
                     )}
-                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                    onClick={() => !isUploading && storage && fileInputRef.current?.click()}
                   >
-                    {isUploading ? (
+                    {!storage ? (
+                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                          <p>Storage not ready...</p>
+                      </div>
+                    ) : isUploading ? (
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                           <p>Uploading...</p>
@@ -201,7 +206,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
                       className="sr-only"
                       accept="image/*"
                       onChange={handleImageChange}
-                      disabled={isUploading || isPending}
+                      disabled={isUploading || isPending || !storage}
                     />
                   </div>
                 </FormControl>
@@ -245,10 +250,10 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isDataLoading}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
+                        <SelectValue placeholder={isDataLoading ? "Loading categories..." : "Select a category"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>

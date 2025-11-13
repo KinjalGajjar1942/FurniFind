@@ -35,10 +35,10 @@ export interface FirebaseContextState {
 
 // Return type for useFirebase()
 export interface FirebaseServicesAndUser {
-  firebaseApp: FirebaseApp;
-  firestore: Firestore;
-  auth: Auth;
-  storage: FirebaseStorage;
+  firebaseApp: FirebaseApp | null;
+  firestore: Firestore | null;
+  auth: Auth | null;
+  storage: FirebaseStorage | null;
   user: User | null;
   isUserLoading: boolean;
   userError: Error | null;
@@ -117,53 +117,55 @@ export const useFirebase = (): Partial<FirebaseServicesAndUser> => {
   if (context === undefined) {
     throw new Error('useFirebase must be used within a FirebaseProvider.');
   }
-
-  // During SSR, services might not be available. We return a partial object.
-  // Client components should check for the existence of services before using them.
-  if (!context.areServicesAvailable) {
-    if (typeof window !== 'undefined') {
-        // On the client, if services aren't ready, we can throw or handle it
-        // For now, we return a partial object, but hooks like useFirestore will throw.
-    }
-    return {
-      firebaseApp: null,
-      firestore: null,
-      auth: null,
-      storage: null,
-      user: context.user,
-      isUserLoading: context.isUserLoading,
-      userError: context.userError,
-    }
-  }
   
   return context as FirebaseServicesAndUser;
 };
 
 /** Hook to access Firebase Auth instance. */
-export const useAuth = (): Auth => {
+export const useAuth = (): Auth | null => {
   const { auth } = useFirebase();
-  if (!auth) throw new Error("Auth not initialized");
+  if (!auth) {
+    if (typeof window !== 'undefined') {
+      console.warn("Auth not initialized yet");
+    }
+    return null;
+  }
   return auth;
 };
 
 /** Hook to access Firestore instance. */
-export const useFirestore = (): Firestore => {
+export const useFirestore = (): Firestore | null => {
   const { firestore } = useFirebase();
-  if (!firestore) throw new Error("Firestore not initialized");
+  if (!firestore) {
+    if (typeof window !== 'undefined') {
+      console.warn("Firestore not initialized yet");
+    }
+    return null;
+  }
   return firestore;
 };
 
 /** Hook to access Firebase App instance. */
-export const useFirebaseApp = (): FirebaseApp => {
+export const useFirebaseApp = (): FirebaseApp | null => {
   const { firebaseApp } = useFirebase();
-  if (!firebaseApp) throw new Error("FirebaseApp not initialized");
+  if (!firebaseApp) {
+    if (typeof window !== 'undefined') {
+      console.warn("FirebaseApp not initialized yet");
+    }
+    return null;
+  }
   return firebaseApp;
 };
 
 /** Hook to access Firebase Storage instance. */
-export const useStorage = (): FirebaseStorage => {
+export const useStorage = (): FirebaseStorage | null => {
     const { storage } = useFirebase();
-    if (!storage) throw new Error("Firebase Storage not initialized");
+    if (!storage) {
+       if (typeof window !== 'undefined') {
+          console.warn("Firebase Storage not initialized yet");
+       }
+       return null;
+    }
     return storage;
 }
 
