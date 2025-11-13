@@ -31,6 +31,23 @@ export default function Header() {
     setIsSeeding(false);
   };
  
+  const handleFixCors = async () => {
+    setIsFixing(true);
+    const result = await fixCorsAction();
+    if (result.success) {
+      toast({
+        title: 'Success!',
+        description: 'CORS policy updated. Please try uploading an image again.',
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'CORS Fix Failed',
+        description: result.message,
+      });
+    }
+    setIsFixing(false);
+  };
 
   return (
     <header className="bg-background/80 backdrop-blur-sm sticky top-0 z-50 border-b border-border">
@@ -44,6 +61,10 @@ export default function Header() {
            <Button onClick={handleSeedData} disabled={isSeeding} variant="outline" size="sm">
             <Database className="mr-2 h-4 w-4" />
             {isSeeding ? 'Seeding...' : 'Seed Categories'}
+          </Button>
+          <Button onClick={handleFixCors} disabled={isFixing} variant="outline" size="sm">
+            <Wrench className="mr-2 h-4 w-4" />
+            {isFixing ? 'Fixing...' : 'Fix CORS'}
           </Button>
         </div>
       </div>
