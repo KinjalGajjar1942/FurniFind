@@ -8,6 +8,9 @@ import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
 import { generateImageHintAction } from '@/app/actions';
 import { uploadImageAndGetUrl, addFurniture, updateFurniture } from '@/lib/firebase/client';
+import { useCollection } from '@/firebase/firestore/use-collection';
+import { useFirestore } from '@/firebase/provider';
+import { collection } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +27,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -36,7 +39,9 @@ interface FurnitureFormProps {
   initialData?: Furniture;
 }
 
-const categories = ["Sofas", "Kitchen", "Bedroom", "Office", "Outdoor"];
+interface Category {
+    name: string;
+}
 
 export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const { toast } = useToast();
@@ -45,6 +50,10 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const [imagePreviews, setImagePreviews] = React.useState<FurnitureImage[]>(initialData?.images || []);
   const [isUploading, setIsUploading] = React.useState(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const firestore = useFirestore();
+  const categoriesQuery = useMemo(() => collection(firestore, 'categories'), [firestore]);
+  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
   const form = useForm<FurnitureFormValues>({
     resolver: zodResolver(furnitureSchema),
@@ -230,15 +239,15 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingCategories}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                      {categories?.map((category) => (
+                        <SelectItem key={category.id} value={category.name}>{category.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

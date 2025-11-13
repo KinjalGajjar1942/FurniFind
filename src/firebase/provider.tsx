@@ -69,25 +69,9 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
 
   // Effect to subscribe to Firebase auth state changes
   useEffect(() => {
-    if (!auth) { // If no Auth service instance, cannot determine user state
-      setUserAuthState({ user: null, isUserLoading: false, userError: new Error("Auth service not provided.") });
-      return;
-    }
-
-    setUserAuthState({ user: null, isUserLoading: true, userError: null }); // Reset on auth instance change
-
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (firebaseUser) => { // Auth state determined
-        setUserAuthState({ user: firebaseUser, isUserLoading: false, userError: null });
-      },
-      (error) => { // Auth listener error
-        console.error("FirebaseProvider: onAuthStateChanged error:", error);
-        setUserAuthState({ user: null, isUserLoading: false, userError: error });
-      }
-    );
-    return () => unsubscribe(); // Cleanup
-  }, [auth]); // Depends on the auth instance
+    // For a no-auth app, we can just set the user to null and not loading.
+    setUserAuthState({ user: null, isUserLoading: false, userError: null });
+  }, [auth]);
 
   // Memoize the context value
   const contextValue = useMemo((): FirebaseContextState => {
