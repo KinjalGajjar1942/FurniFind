@@ -7,9 +7,9 @@ import type { z } from 'zod';
 import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
 import { generateImageHintAction } from '@/app/actions';
-import { uploadImageAndGetUrl, addFurniture, updateFurniture } from '@/lib/firebase/client';
+import { addFurniture, updateFurniture, uploadImageAndGetUrl } from '@/lib/firebase/client';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import { useFirestore, useMemoFirebase } from '@/firebase/provider';
+import { useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,7 @@ interface FurnitureFormProps {
 }
 
 interface Category {
+    id: string;
     name: string;
 }
 
@@ -52,7 +53,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const firestore = useFirestore();
-  const categoriesQuery = useMemoFirebase(() => collection(firestore, 'categories'), [firestore]);
+  const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
   const form = useForm<FurnitureFormValues>({
@@ -113,14 +114,14 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
     startTransition(async () => {
       try {
         if (initialData) {
-          await updateFurniture(initialData.id, values);
+          updateFurniture(initialData.id, values);
           toast({
             title: 'Success!',
             description: 'Furniture item has been updated.',
           });
           router.push(`/furniture/${initialData.id}`);
         } else {
-          const newId = await addFurniture(values);
+          addFurniture(values);
           toast({
             title: 'Success!',
             description: 'New furniture item has been added.',

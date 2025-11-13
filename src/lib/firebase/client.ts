@@ -1,48 +1,41 @@
 
 'use client';
-import { initializeApp, getApps } from 'firebase/app';
+
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getFirestore, collection, addDoc, doc, updateDoc } from "firebase/firestore";
+import { getFirestore, collection, doc, Firestore } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
-import { firebaseConfig } from './config';
+import { addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase/non-blocking-updates';
 import type { z } from 'zod';
 import type { furnitureSchema } from '@/lib/schema';
+import { initializeFirebase } from '@/firebase';
 
-// Initialize Firebase
-const firebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-const storage = getStorage(firebaseApp);
-const db = getFirestore(firebaseApp);
+// Initialize Firebase and get the instances.
+// This is safe to call here because initializeFirebase handles the singleton pattern.
+const { storage, firestore } = initializeFirebase();
 
-const furnitureCollection = collection(db, 'furniture');
+const furnitureCollectionRef = collection(firestore as Firestore, 'furniture');
 
 export async function uploadImageAndGetUrl(file: File): Promise<string> {
     const fileExtension = file.name.split('.').pop();
     const fileName = `furniture-images/${uuidv4()}.${fileExtension}`;
     const storageRef = ref(storage, fileName);
 
-    await uploadBytes(storageRef, file);
-    const downloadUrl = await getDownloadURL(storageRef);
-    return downloadUrl;
-}
-
-export async function addFurniture(furniture: z.infer<typeof furnitureSchema>) {
-  try {
-    const docRef = await addDoc(furnitureCollection, furniture);
-    console.log('Document written with ID: ', docRef.id);
-    return docRef.id;
-  } catch (e) {
-    console.error('Error adding document: ', e);
-    throw new Error('Could not add furniture to database.');
-  }
-}
-
-export async function updateFurniture(id: string, furniture: z.infer<typeof furnitureSchema>) {
     try {
-      const docRef = doc(db, 'furniture', id);
-      await updateDoc(docRef, furniture);
-      console.log('Document with ID ', id, ' updated.');
-    } catch (e) {
-      console.error('Error updating document: ', e);
-      throw new Error('Could not update furniture in database.');
+        await uploadBytes(storageRef, file);
+        const downloadUrl = await getDownloadURL(storageRef);
+        return downloadUrl;
+    } catch (error) {
+        console.error("Upload failed:", error);
+        // This is a good place to check for CORS errors in the browser console.
+        throw new Error('Image upload failed. Please check storage rules and CORS configuration.');
     }
+}
+
+export function addFurniture(furniture: z.infer<typeof furnitureSchema>) {
+    addDocumentNonBlocking(furnitureCollectionRef, furniture);
+}
+
+export function updateFurniture(id: string, furniture: z.infer<typeof furnitureSchema>) {
+    const docRef = doc(firestore as Firestore, 'furniture', id);
+    updateDocumentNonBlocking(docRef, furniture);
 }
