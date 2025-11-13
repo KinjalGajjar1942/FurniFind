@@ -9,7 +9,7 @@ import type { Furniture, FurnitureImage } from '@/lib/types';
 import { generateImageHintAction } from '@/app/actions';
 import { uploadImageAndGetUrl, addFurniture, updateFurniture } from '@/lib/firebase/client';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import { useFirestore } from '@/firebase/provider';
+import { useFirestore, useMemoFirebase } from '@/firebase/provider';
 import { collection } from 'firebase/firestore';
 
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import React, { useMemo } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { UploadCloud, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -52,7 +52,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const firestore = useFirestore();
-  const categoriesQuery = useMemo(() => collection(firestore, 'categories'), [firestore]);
+  const categoriesQuery = useMemoFirebase(() => collection(firestore, 'categories'), [firestore]);
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
   const form = useForm<FurnitureFormValues>({
