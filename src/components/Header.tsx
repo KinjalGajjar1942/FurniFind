@@ -3,15 +3,33 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Wrench } from 'lucide-react';
-import { fixCorsAction } from '@/app/actions';
+import { Database, Wrench } from 'lucide-react';
+import { fixCorsAction, seedDataAction } from '@/app/actions';
 import { useToast } from '@/hooks/use-toast';
 import React from 'react';
 
 export default function Header() {
   const { toast } = useToast();
   const [isFixing, setIsFixing] = React.useState(false);
+  const [isSeeding, setIsSeeding] = React.useState(false);
 
+  const handleSeedData = async () => {
+    setIsSeeding(true);
+    const result = await seedDataAction();
+    if (result.success) {
+      toast({
+        title: 'Success!',
+        description: 'Categories have been seeded. You can now add furniture.',
+      });
+    } else {
+      toast({
+        variant: 'destructive',
+        title: 'Seeding Failed',
+        description: result.message,
+      });
+    }
+    setIsSeeding(false);
+  };
  
 
   return (
@@ -23,7 +41,10 @@ export default function Header() {
           </h1>
         </Link>
         <div className="flex items-center gap-4">
-       
+           <Button onClick={handleSeedData} disabled={isSeeding} variant="outline" size="sm">
+            <Database className="mr-2 h-4 w-4" />
+            {isSeeding ? 'Seeding...' : 'Seed Categories'}
+          </Button>
         </div>
       </div>
     </header>

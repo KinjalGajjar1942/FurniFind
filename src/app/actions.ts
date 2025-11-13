@@ -4,6 +4,7 @@ import { ai } from '@/ai/genkit';
 import { getStorage } from 'firebase-admin/storage';
 import { getFirebaseAdminApp } from '@/lib/firebase/server-config';
 import { headers } from 'next/headers';
+import { seedCategories } from '@/lib/seed';
 
 export async function generateImageHintAction(photoDataUri: string): Promise<string> {
   const hintPrompt = ai.definePrompt({
@@ -46,6 +47,16 @@ export async function fixCorsAction() {
     return { success: true, message: `Successfully updated CORS policy for bucket ${bucket.name}.` };
   } catch (error: any) {
     console.error('Error setting CORS configuration:', error);
+    return { success: false, message: error.message || 'An unknown error occurred.' };
+  }
+}
+
+export async function seedDataAction() {
+  try {
+    await seedCategories();
+    return { success: true, message: 'Successfully seeded categories!' };
+  } catch (error: any) {
+    console.error('Error seeding data:', error);
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
 }
