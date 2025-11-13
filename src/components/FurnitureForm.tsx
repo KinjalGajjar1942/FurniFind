@@ -6,9 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
-import { generateImageHintAction } from '@/app/actions';
-import { addFurniture, updateFurniture, uploadImageAndGetUrl } from '@/lib/firebase/client';
-import { useFirestore, useMemoFirebase, useStorage } from '@/firebase';
+import { generateImageHintAction, uploadImageAction } from '@/app/actions';
+import { addFurniture, updateFurniture } from '@/lib/firebase/client';
+import { useFirestore, useMemoFirebase } from '@/firebase';
 import { useCollection } from '@/firebase/firestore/use-collection';
 import { collection } from 'firebase/firestore';
 
@@ -53,7 +53,6 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const firestore = useFirestore();
-  const storage = useStorage();
   const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
@@ -77,17 +76,19 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && storage) {
+    if (file) {
       setIsUploading(true);
       try {
-        const imageUrl = await uploadImageAndGetUrl(storage, file);
+        const formData = new FormData();
+        formData.append('file', file);
+        const imageUrl = await uploadImageAction(formData);
 
         const arrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString('base64');
         const dataURI = `data:${file.type};base64,${base64}`;
 
         const imageHint = await generateImageHintAction(dataURI);
-
+        console.error("imageUrl", imageUrl);
         const newImage: FurnitureImage = { url: imageUrl, hint: imageHint };
         setImagePreviews(prev => [...prev, newImage]);
 
@@ -181,15 +182,11 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
                   <div
                     className={cn(
                       "relative mt-2 flex justify-center items-center aspect-square rounded-lg border-2 border-dashed border-border text-center cursor-pointer hover:border-primary transition-colors",
-                      { 'border-primary': isUploading, 'cursor-not-allowed opacity-50': !storage }
+                      { 'border-primary': isUploading, 'cursor-not-allowed opacity-50': isUploading }
                     )}
-                    onClick={() => !isUploading && storage && fileInputRef.current?.click()}
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
                   >
-                    {!storage ? (
-                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                          <p>Storage not ready...</p>
-                      </div>
-                    ) : isUploading ? (
+                    {isUploading ? (
                       <div className="flex flex-col items-center gap-2 text-muted-foreground">
                           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                           <p>Uploading...</p>
@@ -206,7 +203,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
                       className="sr-only"
                       accept="image/*"
                       onChange={handleImageChange}
-                      disabled={isUploading || isPending || !storage}
+                      disabled={isUploading || isPending}
                     />
                   </div>
                 </FormControl>
