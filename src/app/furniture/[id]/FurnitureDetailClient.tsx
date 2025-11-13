@@ -15,13 +15,10 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import type { Furniture } from '@/lib/types';
-import { useAuth } from '@/components/AuthProvider';
 
 
 export default function FurnitureDetailClient({ furniture }: { furniture: Furniture }) {
   const { toast } = useToast();
-  const { user } = useAuth();
-  const isAdmin = user?.email === 'admin@example.com';
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -96,14 +93,12 @@ export default function FurnitureDetailClient({ furniture }: { furniture: Furnit
               <Share2 className="mr-2 h-4 w-4" />
               Share
             </Button>
-            {isAdmin && (
-              <Button size="lg" variant="outline" asChild>
-                <Link href={`/edit/${furniture.id}`}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  Edit Item
-                </Link>
-              </Button>
-            )}
+            <Button size="lg" variant="outline" asChild>
+              <Link href={`/edit/${furniture.id}`}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit Item
+              </Link>
+            </Button>
           </div>
         </div>
       </div>

@@ -3,11 +3,11 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Anyone can read furniture listings
-    match /furniture/{furnitureId} {
-      allow read: if true;
-      // Only authenticated users can create, update, or delete.
-      allow write: if request.auth != null;
+    // Allow public read and write access to all documents.
+    // This is suitable for a single-user admin app but would need to be
+    // secured with authentication rules for a multi-user app.
+    match /{document=**} {
+      allow read, write: if true;
     }
   }
 }
