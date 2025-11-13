@@ -6,8 +6,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
-import { createFurnitureAction, updateFurnitureAction, generateImageHintAction } from '@/app/actions';
-import { uploadImageAndGetUrl } from '@/lib/firebase/client';
+import { generateImageHintAction } from '@/app/actions';
+import { uploadImageAndGetUrl, addFurniture, updateFurniture } from '@/lib/firebase/client';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -104,23 +104,26 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
     startTransition(async () => {
       try {
         if (initialData) {
-          await updateFurnitureAction(initialData.id, values);
+          await updateFurniture(initialData.id, values);
           toast({
             title: 'Success!',
             description: 'Furniture item has been updated.',
           });
+          router.push(`/furniture/${initialData.id}`);
         } else {
-          await createFurnitureAction(values);
+          const newId = await addFurniture(values);
           toast({
             title: 'Success!',
             description: 'New furniture item has been added.',
           });
+          router.push('/');
         }
       } catch (error) {
+        console.error("Error saving furniture:", error);
         toast({
           variant: 'destructive',
           title: 'Uh oh! Something went wrong.',
-          description: 'There was a problem with your request.',
+          description: 'There was a problem saving your item.',
         });
       }
     });
