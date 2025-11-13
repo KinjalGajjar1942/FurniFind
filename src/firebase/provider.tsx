@@ -7,7 +7,7 @@ import { Firestore } from 'firebase/firestore';
 import { Auth, User } from 'firebase/auth';
 import { FirebaseStorage } from 'firebase/storage';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener'
-import { initializeFirebase, getSdks } from '@/firebase';
+import { initializeFirebase } from '@/firebase';
 
 interface FirebaseProviderProps {
   children: ReactNode;
@@ -111,25 +111,32 @@ export const FirebaseProvider: React.FC<FirebaseProviderProps> = ({
  * Hook to access core Firebase services and user authentication state.
  * Throws error if core services are not available or used outside provider.
  */
-export const useFirebase = (): FirebaseServicesAndUser => {
+export const useFirebase = (): Partial<FirebaseServicesAndUser> => {
   const context = useContext(FirebaseContext);
 
   if (context === undefined) {
     throw new Error('useFirebase must be used within a FirebaseProvider.');
   }
 
-  if (!context.areServicesAvailable || !context.firebaseApp || !context.firestore || !context.auth || !context.storage) {
-    // This can happen during SSR if the context isn't fully initialized,
-    // but client components should wait for `areServicesAvailable` to be true.
-    // We throw here for client components that misuse the hook.
+  // During SSR, services might not be available. We return a partial object.
+  // Client components should check for the existence of services before using them.
+  if (!context.areServicesAvailable) {
     if (typeof window !== 'undefined') {
-      throw new Error('Firebase core services not available. Check FirebaseProvider setup.');
+        // On the client, if services aren't ready, we can throw or handle it
+        // For now, we return a partial object, but hooks like useFirestore will throw.
     }
-    // Silently fail on server, components should handle null services.
+    return {
+      firebaseApp: null,
+      firestore: null,
+      auth: null,
+      storage: null,
+      user: context.user,
+      isUserLoading: context.isUserLoading,
+      userError: context.userError,
+    }
   }
   
-  // @ts-ignore
-  return context;
+  return context as FirebaseServicesAndUser;
 };
 
 /** Hook to access Firebase Auth instance. */
