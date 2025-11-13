@@ -8,7 +8,7 @@ import { getStorage, type FirebaseStorage } from 'firebase/storage';
 import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 // This is the primary client-side config.
-// It is essential that all NEXT_PUBLIC_ variables are defined.
+// It is essential that all NEXT_PUBLIC_ variables are defined in your .env file.
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,

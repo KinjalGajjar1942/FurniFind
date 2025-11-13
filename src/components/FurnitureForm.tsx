@@ -86,9 +86,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
         const arrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString('base64');
         const dataURI = `data:${file.type};base64,${base64}`;
-        console.error("imageUrl", imageUrl);
-        console.error("base64", base64);
-        console.error("dataURI", dataURI);
+        
         const imageHint = await generateImageHintAction(dataURI);
 
         const newImage: FurnitureImage = { url: imageUrl, hint: imageHint };
@@ -117,6 +115,9 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const onSubmit = (values: FurnitureFormValues) => {
     startTransition(async () => {
       try {
+        if (!firestore) {
+          throw new Error("Firestore not available");
+        }
         if (initialData) {
           await updateFurniture(firestore, initialData.id, values);
           toast({

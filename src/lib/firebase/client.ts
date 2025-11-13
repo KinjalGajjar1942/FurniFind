@@ -1,7 +1,7 @@
 
 'use client';
 
-import { getStorage, ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
+import { ref, uploadBytes, getDownloadURL, FirebaseStorage } from 'firebase/storage';
 import { collection, doc, addDoc, updateDoc, Firestore } from "firebase/firestore";
 import { v4 as uuidv4 } from 'uuid';
 import type { z } from 'zod';

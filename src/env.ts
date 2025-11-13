@@ -1,3 +1,4 @@
+
 import 'dotenv/config';
 import { z } from 'zod';
 
@@ -20,7 +21,12 @@ const envSchema = z.object({
       // The service account key is a JSON string, so we need to parse it.
       // It may have single quotes, so we replace them with double quotes.
       const parsed = JSON.parse(str.replace(/'/g, '"'));
-      return serviceAccountSchema.parse(parsed);
+      const result = serviceAccountSchema.safeParse(parsed);
+      if (!result.success) {
+        ctx.addIssue({ code: 'custom', message: 'Invalid service account key structure.' });
+        return z.NEVER;
+      }
+      return result.data;
     } catch (e) {
       console.error("Failed to parse FIREBASE_SERVICE_ACCOUNT_KEY:", e);
       ctx.addIssue({ code: 'custom', message: 'Invalid service account key JSON.' });
@@ -43,7 +49,7 @@ if (!parsedEnv.success) {
     '❌ Invalid environment variables:',
     parsedEnv.error.flatten().fieldErrors,
   );
-  throw new Error('Invalid environment variables.');
+  throw new Error('Invalid environment variables. Please check your .env file and compare it with the expected schema.');
 }
 
 export const env = parsedEnv.data;
