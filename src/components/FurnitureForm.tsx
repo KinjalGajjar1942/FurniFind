@@ -9,8 +9,9 @@ import type { Furniture, FurnitureImage } from '@/lib/types';
 import { generateImageHintAction } from '@/app/actions';
 import { addFurniture, updateFurniture, uploadImageAndGetUrl } from '@/lib/firebase/client';
 import { useCollection } from '@/firebase/firestore/use-collection';
-import { useFirestore, useMemoFirebase } from '@/firebase';
-import { collection } from 'firebase/firestore';
+import { useFirebase, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, type Firestore } from 'firebase/firestore';
+import type { FirebaseStorage } from 'firebase/storage';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -53,6 +54,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const firestore = useFirestore();
+  const { storage } = useFirebase();
   const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
   const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
 
@@ -76,10 +78,10 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
 
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (file && storage) {
       setIsUploading(true);
       try {
-        const imageUrl = await uploadImageAndGetUrl(file);
+        const imageUrl = await uploadImageAndGetUrl(storage, file);
 
         const arrayBuffer = await file.arrayBuffer();
         const base64 = Buffer.from(arrayBuffer).toString('base64');
@@ -114,14 +116,14 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
     startTransition(async () => {
       try {
         if (initialData) {
-          updateFurniture(initialData.id, values);
+          await updateFurniture(firestore, initialData.id, values);
           toast({
             title: 'Success!',
             description: 'Furniture item has been updated.',
           });
           router.push(`/furniture/${initialData.id}`);
         } else {
-          addFurniture(values);
+          await addFurniture(firestore, values);
           toast({
             title: 'Success!',
             description: 'New furniture item has been added.',
