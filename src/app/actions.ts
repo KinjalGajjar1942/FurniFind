@@ -3,6 +3,7 @@
 import { ai } from '@/ai/genkit';
 import { getStorage } from 'firebase-admin/storage';
 import { getFirebaseAdminApp } from '@/lib/firebase/server-config';
+import { headers } from 'next/headers';
 
 export async function generateImageHintAction(photoDataUri: string): Promise<string> {
   const hintPrompt = ai.definePrompt({
@@ -25,10 +26,11 @@ export async function fixCorsAction() {
     const app = getFirebaseAdminApp();
     const bucket = getStorage(app).bucket();
     
-    // Get the origin from environment variables
-    const origin = process.env.APP_ORIGIN;
+    const headersList = headers();
+    const origin = headersList.get('origin');
+    
     if (!origin) {
-        throw new Error("APP_ORIGIN environment variable not set.");
+        throw new Error("Could not determine origin from request headers.");
     }
 
     const corsConfiguration = [{
