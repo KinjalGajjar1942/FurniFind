@@ -1,3 +1,4 @@
+
 import { getFurnitureItemsByCategory, getCategories } from '@/lib/data';
 import FurnitureCard from '@/components/FurnitureCard';
 import Link from 'next/link';
@@ -12,16 +13,15 @@ export async function generateStaticParams() {
   }));
 }
 
-export default async function CategoryPage({ params }: { params: { name: string } }) {
-  const furnitureItems = await getFurnitureItemsByCategory(params.name);
+export default async function CategoryPage({ params: { name } }: { params: { name: string } }) {
+  const categoryName = name.charAt(0).toUpperCase() + name.slice(1);
+  const furnitureItems = await getFurnitureItemsByCategory(categoryName);
 
   if (furnitureItems.length === 0) {
     // This can happen if a category has no items. 
     // We can show a friendly message.
-    console.log(`No furniture found for category: ${params.name}`);
+    console.log(`No furniture found for category: ${name}`);
   }
-  
-  const categoryName = params.name.charAt(0).toUpperCase() + params.name.slice(1);
 
   return (
     <div className="container mx-auto px-4 py-12">

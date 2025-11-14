@@ -57,7 +57,7 @@ export default function Header() {
             FurniFind
           </h1>
         </Link>
-        <div className="flex items-center gap-4">
+        {/* <div className="flex items-center gap-4">
            <Button onClick={handleSeedData} disabled={isSeeding} variant="outline" size="sm">
             <Database className="mr-2 h-4 w-4" />
             {isSeeding ? 'Seeding...' : 'Seed Categories'}
@@ -66,7 +66,7 @@ export default function Header() {
             <Wrench className="mr-2 h-4 w-4" />
             {isFixing ? 'Fixing...' : 'Fix CORS'}
           </Button>
-        </div>
+        </div> */}
       </div>
     </header>
   );
