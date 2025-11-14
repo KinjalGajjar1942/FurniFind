@@ -1,10 +1,11 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import type { Furniture } from '@/lib/types';
 import { getFurnitureById, deleteFurniture } from '@/lib/firebase/client';
-import { useFirestore, useUser } from '@/firebase';
+import { useFirestore } from '@/firebase';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,18 +28,6 @@ export default function FurnitureDetailPage() {
   const id = params.id as string;
 
   const firestore = useFirestore();
-  const { user, isUserLoading } = useUser();
-  const [isCarpenter, setIsCarpenter] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      user.getIdTokenResult().then(idTokenResult => {
-        setIsCarpenter(idTokenResult.claims.role === 'carpenter');
-      });
-    } else {
-      setIsCarpenter(false);
-    }
-  }, [user]);
 
   useEffect(() => {
     if (!firestore || !id) return;
@@ -64,7 +53,7 @@ export default function FurnitureDetailPage() {
   }, [firestore, id]);
 
   const handleDelete = async () => {
-    if (!firestore || !id || !isCarpenter) return;
+    if (!firestore || !id) return;
     try {
       await deleteFurniture(firestore, id);
       toast({ title: 'Success', description: 'Furniture item deleted.' });
@@ -174,39 +163,37 @@ export default function FurnitureDetailPage() {
                     <CardDescription className="text-base italic">No description provided.</CardDescription>
                 )}
               </CardContent>
-              <CardFooter className="flex flex-col sm:flex-row gap-2 pt-4">
+              <CardFooter className="flex flex-col gap-2 pt-4">
                 <Button onClick={handleShare} className="w-full gap-2">
                   <Share2 className="h-4 w-4" />
                   Share with Carpenter
                 </Button>
-                {!isUserLoading && isCarpenter && (
-                  <div className="flex w-full gap-2">
-                      <Link href={`/edit/${id}`} passHref className="w-full">
-                          <Button variant="outline" className="w-full gap-2">
-                              <Edit className="h-4 w-4" /> Edit
-                          </Button>
-                      </Link>
-                      <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                              <Button variant="destructive" className="w-full gap-2">
-                              <Trash2 className="h-4 w-4" /> Delete
-                              </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent>
-                              <AlertDialogHeader>
-                              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                  This action cannot be undone. This will permanently delete the furniture item.
-                              </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-                              </AlertDialogFooter>
-                          </AlertDialogContent>
-                      </AlertDialog>
-                  </div>
-                )}
+                <div className="flex w-full flex-col sm:flex-row gap-2">
+                    <Link href={`/furniture/${id}/edit`} passHref className="w-full">
+                        <Button variant="outline" className="w-full gap-2">
+                            <Edit className="h-4 w-4" /> Edit
+                        </Button>
+                    </Link>
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="w-full gap-2">
+                            <Trash2 className="h-4 w-4" /> Delete
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                                This action cannot be undone. This will permanently delete the furniture item.
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
               </CardFooter>
             </div>
           </div>
