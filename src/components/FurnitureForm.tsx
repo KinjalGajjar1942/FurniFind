@@ -6,11 +6,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { z } from 'zod';
 import { furnitureSchema } from '@/lib/schema';
 import type { Furniture, FurnitureImage } from '@/lib/types';
-import { generateImageHintAction, uploadImageAction } from '@/app/actions';
+import { generateImageHintAction, getCategoriesAction, uploadImageAction } from '@/app/actions';
 import { addFurniture, updateFurniture } from '@/lib/firebase/client';
-import { useFirestore, useMemoFirebase } from '@/firebase';
-import { useCollection } from '@/firebase/firestore/use-collection';
-import { collection } from 'firebase/firestore';
+import { useFirestore, useStorage } from '@/firebase';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -53,8 +51,32 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const firestore = useFirestore();
-  const categoriesQuery = useMemoFirebase(() => firestore ? collection(firestore, 'categories') : null, [firestore]);
-  const { data: categories, isLoading: isLoadingCategories } = useCollection<Category>(categoriesQuery);
+  const storage = useStorage();
+  
+  const [categories, setCategories] = React.useState<Category[]>([]);
+  const [isLoadingCategories, setIsLoadingCategories] = React.useState(true);
+
+
+  React.useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setIsLoadingCategories(true);
+        const fetchedCategories = await getCategoriesAction();
+        setCategories(fetchedCategories);
+      } catch (error) {
+        console.error("Failed to fetch categories:", error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Could not load categories.",
+        });
+      } finally {
+        setIsLoadingCategories(false);
+      }
+    };
+    fetchCategories();
+  }, [toast]);
+
 
   const form = useForm<FurnitureFormValues>({
     resolver: zodResolver(furnitureSchema),
@@ -74,11 +96,15 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
     form.setValue('images', imagePreviews);
   }, [imagePreviews, form]);
 
+
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       setIsUploading(true);
       try {
+        if (!storage) {
+          throw new Error("Storage not available");
+        }
         const formData = new FormData();
         formData.append('file', file);
         const imageUrl = await uploadImageAction(formData);
@@ -88,7 +114,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
         const dataURI = `data:${file.type};base64,${base64}`;
 
         const imageHint = await generateImageHintAction(dataURI);
-        console.error("imageUrl", imageUrl);
+
         const newImage: FurnitureImage = { url: imageUrl, hint: imageHint };
         setImagePreviews(prev => [...prev, newImage]);
 
@@ -144,7 +170,7 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
     });
   };
   
-  const isDataLoading = !firestore || isLoadingCategories;
+  const isDataLoading = isLoadingCategories;
 
   return (
     <Card className="max-w-4xl mx-auto">
@@ -159,10 +185,10 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
             <FormItem>
               <FormLabel>Furniture Images</FormLabel>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {imagePreviews.map((image, index) => (
+                {imagePreviews?.map((image, index) => (
                   <div key={index} className="relative group aspect-square">
                     <Image
-                      src={image.url}
+                      src={image?.url}
                       alt={`Preview ${index + 1}`}
                       fill
                       className="object-cover rounded-lg"

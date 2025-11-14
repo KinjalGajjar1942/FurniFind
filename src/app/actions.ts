@@ -3,11 +3,27 @@
 
 import { ai } from '@/ai/genkit';
 import { getStorage } from 'firebase-admin/storage';
+import { getFirestore } from 'firebase-admin/firestore';
 import { getFirebaseAdminApp } from '@/lib/firebase/server-config';
 import { headers } from 'next/headers';
 import { seedCategories } from '@/lib/seed';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { createSupabaseAdmin } from '@/lib/supabase/server';
 import { v4 as uuidv4 } from 'uuid';
+
+interface FurnitureData {
+    name: string;
+    category: string;
+    imageUrl: string;
+}
+
+export async function addFurnitureAction(data: FurnitureData) {
+    const app = getFirebaseAdminApp();
+    const db = getFirestore(app);
+
+    await db.collection('furniture').add(data);
+
+    return { success: true, message: 'Successfully added furniture!' };
+}
 
 export async function generateImageHintAction(photoDataUri: string): Promise<string> {
   const hintPrompt = ai.definePrompt({
@@ -30,7 +46,7 @@ export async function uploadImageAction(formData: FormData): Promise<string> {
     throw new Error('No file provided');
   }
 
-  const supabase = createSupabaseServerClient();
+  const supabase = createSupabaseAdmin();
   const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
   const { data, error } = await supabase.storage
     .from('uploads')
@@ -86,4 +102,18 @@ export async function seedDataAction() {
     console.error('Error seeding data:', error);
     return { success: false, message: error.message || 'An unknown error occurred.' };
   }
+}
+
+
+export async function getCategoriesAction(): Promise<{ id: string; name: string }[]> {
+  const app = getFirebaseAdminApp();
+  const db = getFirestore(app);
+  const categoriesSnapshot = await db.collection('categories').get();
+  if (categoriesSnapshot.empty) {
+    return [];
+  }
+  return categoriesSnapshot.docs.map(doc => ({
+    id: doc.id,
+    name: doc.data().name as string,
+  }));
 }
