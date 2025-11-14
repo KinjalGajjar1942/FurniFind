@@ -50,7 +50,7 @@ export async function uploadImageAction(formData: FormData): Promise<string> {
   const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
   const { data, error } = await supabase.storage
     .from('uploads')
-    .upload(`public/${uuidv4()}-${cleanFileName}`, file);
+    .upload(`${uuidv4()}-${cleanFileName}`, file);
 
   if (error) {
     console.error('Supabase upload error:', error);
