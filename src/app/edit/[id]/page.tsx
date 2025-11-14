@@ -25,31 +25,33 @@ export default function EditFurniturePage({ params }: { params: { id: string } }
       user.getIdTokenResult().then(idTokenResult => {
         if (idTokenResult.claims.role !== 'carpenter') {
           router.push('/');
+          setLoading(false);
         } else {
           setIsCarpenter(true);
+          // Fetch furniture only if user is a carpenter
+            if (!firestore) return;
+            const fetchFurniture = async () => {
+              const item = await getFurnitureById(firestore, params.id);
+              if (!item) {
+                notFound();
+              } else {
+                setFurniture(item);
+              }
+              setLoading(false);
+            }
+            fetchFurniture();
         }
       });
     }
-  }, [user, isUserLoading, router]);
+  }, [user, isUserLoading, router, firestore, params.id]);
 
 
-  useEffect(() => {
-    if (!isCarpenter || !firestore) return;
-    const fetchFurniture = async () => {
-      const item = await getFurnitureById(firestore, params.id);
-      if (!item) {
-        notFound();
-      } else {
-        setFurniture(item);
-      }
-      setLoading(false);
-    }
-    fetchFurniture();
-  }, [params.id, isCarpenter, firestore]);
-
-
-  if (loading || isUserLoading || !isCarpenter) {
+  if (loading || isUserLoading) {
     return <div className="container mx-auto px-4 py-12">Loading...</div>;
+  }
+  
+  if (!isCarpenter) {
+     return <div className="container mx-auto px-4 py-12">Access Denied. Redirecting...</div>;
   }
 
   return (
