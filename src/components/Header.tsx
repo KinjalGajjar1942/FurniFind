@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LogIn, LogOut, UserPlus } from 'lucide-react';
+import { LogIn, LogOut } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import React from 'react';
@@ -36,15 +36,9 @@ export default function Header() {
          ) : isAdminPage ? (
             <>
               <Button asChild variant="ghost" size="sm">
-                <Link href="/login">
+                <Link href="/admin">
                   <LogIn className="mr-2 h-4 w-4" />
                   Login
-                </Link>
-              </Button>
-              <Button asChild size="sm">
-                <Link href="/signup">
-                  <UserPlus className="mr-2 h-4 w-4" />
-                  Sign Up
                 </Link>
               </Button>
             </>
@@ -53,7 +47,14 @@ export default function Header() {
               <LogOut className="mr-2 h-4 w-4" />
               Logout
             </Button>
-         ) : null}
+         ) : (
+            <Button asChild variant="ghost" size="sm">
+              <Link href="/admin">
+                <LogIn className="mr-2 h-4 w-4" />
+                Admin Login
+              </Link>
+            </Button>
+         )}
         </div>
       </div>
     </header>

@@ -1,10 +1,11 @@
 'use client';
 import FurnitureForm from '@/components/FurnitureForm';
-import { getFurnitureItemById } from '@/lib/data';
+import { useUser } from '@/firebase';
 import { notFound, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import type { Furniture } from '@/lib/types';
-import { useUser } from '@/firebase';
+import { getFurnitureById } from '@/lib/firebase/client';
+import { useFirestore } from '@/firebase';
 
 
 export default function EditFurniturePage({ params }: { params: { id: string } }) {
@@ -13,11 +14,12 @@ export default function EditFurniturePage({ params }: { params: { id: string } }
   const { user, isUserLoading } = useUser();
   const router = useRouter();
   const [isCarpenter, setIsCarpenter] = useState(false);
+  const firestore = useFirestore();
 
   useEffect(() => {
     if (!isUserLoading) {
       if (!user) {
-        router.push('/login');
+        router.push('/admin');
         return;
       }
       user.getIdTokenResult().then(idTokenResult => {
@@ -32,9 +34,9 @@ export default function EditFurniturePage({ params }: { params: { id: string } }
 
 
   useEffect(() => {
-    if (!isCarpenter) return;
+    if (!isCarpenter || !firestore) return;
     const fetchFurniture = async () => {
-      const item = await getFurnitureItemById(params.id);
+      const item = await getFurnitureById(firestore, params.id);
       if (!item) {
         notFound();
       } else {
@@ -43,7 +45,7 @@ export default function EditFurniturePage({ params }: { params: { id: string } }
       setLoading(false);
     }
     fetchFurniture();
-  }, [params.id, isCarpenter]);
+  }, [params.id, isCarpenter, firestore]);
 
 
   if (loading || isUserLoading || !isCarpenter) {

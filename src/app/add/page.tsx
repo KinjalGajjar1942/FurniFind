@@ -12,7 +12,7 @@ export default function AddFurniturePage() {
   useEffect(() => {
     if (!isUserLoading) {
       if (!user) {
-        router.push('/login');
+        router.push('/admin');
         return;
       }
       user.getIdTokenResult().then(idTokenResult => {

@@ -1,0 +1,37 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions
+    function isCarpenter() {
+      // Check for the 'carpenter' role in the user's custom claims.
+      return request.auth.token.role == 'carpenter';
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Public read for categories
+    match /categories/{category} {
+      allow read: if true;
+    }
+
+    // Rules for the users collection
+    match /users/{userId} {
+      // Only the owner can read their own user document.
+      allow read: if isOwner(userId);
+      // A user can create their own document, needed for role assignment.
+      allow create: if request.auth != null && isOwner(userId);
+    }
+
+    // Public read for furniture, but write access is restricted.
+    match /furniture/{furnitureId} {
+      allow read: if true;
+      // Only users with the 'carpenter' role can create, update, or delete furniture.
+      allow create, update, delete: if isCarpenter();
+    }
+  }
+}
