@@ -64,20 +64,23 @@ export default function SignupPage() {
       );
       const user = userCredential.user;
 
-      // Check if this is the first user
+      // This is a placeholder for a more robust role assignment system.
+      // In a real app, this would be handled by a backend function.
+      const role = 'customer'; 
+      
+      // Check if this is the first user to assign carpenter role
       const usersCollection = collection(firestore, 'users');
       const usersSnapshot = await getDocs(usersCollection);
       const isFirstUser = usersSnapshot.empty;
-      
-      const role = isFirstUser ? 'carpenter' : 'customer';
+      const assignedRole = isFirstUser ? 'carpenter' : 'customer';
 
       await setDoc(doc(firestore, 'users', user.uid), {
         email: user.email,
-        role: role,
+        role: assignedRole,
       });
 
       // We need a server action to set custom claims
-      await setCustomUserClaims(user.uid, { role });
+      await setCustomUserClaims(user.uid, { role: assignedRole });
 
       // Force refresh of token to get custom claims
       await user.getIdToken(true);
@@ -85,7 +88,7 @@ export default function SignupPage() {
 
       toast({
         title: 'Signup Successful',
-        description: `Welcome! You have been assigned the ${role} role.`,
+        description: `Welcome! You have been assigned the ${assignedRole} role.`,
       });
       router.push('/');
     } catch (error: any) {

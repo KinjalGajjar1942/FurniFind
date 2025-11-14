@@ -21,7 +21,8 @@ service cloud.firestore {
     // Rules for the users collection
     match /users/{userId} {
       allow read: if isOwner(userId);
-      allow create: if request.auth != null; // Anyone can create their own user document
+      // Allow a user to create their own user document upon signup.
+      allow create: if isOwner(userId) && request.auth != null;
     }
 
     // Public read for furniture
