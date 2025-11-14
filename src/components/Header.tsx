@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { LogIn, LogOut, UserPlus, ShieldCheck } from 'lucide-react';
+import { LogIn, LogOut, UserPlus, ShieldCheck, Mail } from 'lucide-react';
 import { useAuth, useUser } from '@/firebase';
 import { useRouter, usePathname } from 'next/navigation';
 import React from 'react';
@@ -36,6 +36,14 @@ export default function Header() {
           </h1>
         </Link>
         <div className="flex items-center gap-2">
+          {pathname !== '/contact' && pathname !== '/contact/page' && (
+            <Link href="/contact">
+              <Button variant="outline" size="sm">
+                <Mail className="mr-2 h-4 w-4" />
+                Contact Us
+              </Button>
+            </Link>
+          )}
           {isUserLoading ? (
             <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
           ) : user ? (

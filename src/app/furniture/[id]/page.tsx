@@ -39,7 +39,15 @@ import {
 } from "@/components/ui/alert-dialog";
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronLeft, Edit, Trash2, Share2, CornerUpLeft } from "lucide-react";
+import { ChevronLeft, Edit, Trash2, Share2, CornerUpLeft, Copy } from "lucide-react";
+// WhatsApp SVG Icon
+const WhatsAppIcon = (props: React.SVGProps<SVGSVGElement>) => (
+  <svg viewBox="0 0 32 32" fill="currentColor" width={20} height={20} {...props}>
+    <g>
+      <path d="M16.001 3.2c-7.06 0-12.8 5.74-12.8 12.8 0 2.26.6 4.47 1.74 6.41L3.2 28.8l6.56-1.71c1.87 1.02 3.98 1.56 6.24 1.56h.01c7.06 0 12.8-5.74 12.8-12.8s-5.74-12.8-12.8-12.8zm0 23.04c-2.01 0-3.98-.54-5.68-1.56l-.41-.24-3.89 1.01 1.04-3.78-.27-.39c-1.09-1.6-1.67-3.47-1.67-5.41 0-5.36 4.36-9.72 9.72-9.72s9.72 4.36 9.72 9.72-4.36 9.72-9.72 9.72zm5.34-7.29c-.29-.15-1.7-.84-1.96-.94-.26-.1-.45-.15-.64.15-.19.29-.74.94-.91 1.13-.17.19-.34.22-.63.07-.29-.15-1.22-.45-2.33-1.43-.86-.77-1.44-1.72-1.61-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.07-.15-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49-.17-.01-.36-.01-.56-.01-.19 0-.51.07-.78.36-.27.29-1.03 1.01-1.03 2.46s1.06 2.85 1.21 3.05c.15.19 2.09 3.2 5.08 4.36.71.31 1.26.5 1.69.64.71.23 1.36.2 1.87.12.57-.09 1.7-.7 1.94-1.37.24-.67.24-1.25.17-1.37-.07-.12-.26-.19-.54-.34z" />
+    </g>
+  </svg>
+);
 import { doc, getDoc } from 'firebase/firestore';
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -345,13 +353,15 @@ useEffect(() => {
 
                     <Button
                       onClick={handleWhatsAppShare}
-                      className="w-full bg-green-500 hover:bg-green-600 text-white"
+                      className="w-full bg-green-500 hover:bg-green-600 text-white gap-2"
                       type="button"
                     >
+                      <WhatsAppIcon className="h-5 w-5" />
                       WhatsApp
                     </Button>
 
-                    <Button onClick={handleCopyLink} className="w-full" type="button">
+                    <Button onClick={handleCopyLink} className="w-full gap-2" type="button">
+                      <Copy className="h-4 w-4" />
                       Copy Link
                     </Button>
                   </div>
