@@ -33,12 +33,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
          {isUserLoading ? (
             <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
-         ) : user && !isAdminPage ? (
-            <Button onClick={handleSignOut} variant="outline" size="sm">
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-         ) : (
+         ) : isAdminPage ? (
             <>
               <Button asChild variant="ghost" size="sm">
                 <Link href="/login">
@@ -53,7 +48,12 @@ export default function Header() {
                 </Link>
               </Button>
             </>
-         )}
+         ) : user ? (
+            <Button onClick={handleSignOut} variant="outline" size="sm">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+         ) : null}
         </div>
       </div>
     </header>
