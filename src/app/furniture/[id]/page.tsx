@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useUser } from '@/firebase';
 import { useParams, useRouter } from 'next/navigation';
 import type { Furniture } from '@/lib/types';
 import { getFurnitureById, deleteFurniture } from '@/lib/firebase/client';
@@ -22,10 +23,31 @@ export default function FurnitureDetailPage() {
   const [furniture, setFurniture] = useState<Furniture | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isCarpenter, setIsCarpenter] = useState(false);
+  const [isUserCheckLoading, setIsUserCheckLoading] = useState(true);
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
   const id = params.id as string;
+  const { user, isUserLoading } = useUser();
+  // Check if user is carpenter
+  useEffect(() => {
+    if (!isUserLoading) {
+      if (!user) {
+        setIsCarpenter(false);
+        setIsUserCheckLoading(false);
+        return;
+      }
+      user.getIdTokenResult().then(idTokenResult => {
+        if (idTokenResult.claims.role === 'carpenter') {
+          setIsCarpenter(true);
+        } else {
+          setIsCarpenter(false);
+        }
+        setIsUserCheckLoading(false);
+      });
+    }
+  }, [user, isUserLoading]);
 
   const firestore = useFirestore();
 
@@ -80,25 +102,9 @@ export default function FurnitureDetailPage() {
   };
 
 
-  if (isLoading) {
+  if (isLoading || isUserCheckLoading) {
     return (
-        <div className="max-w-4xl mx-auto p-4 md:p-8">
-            <div className="animate-pulse">
-                <div className="h-10 w-48 bg-muted rounded-md mb-8"></div>
-                <div className="grid md:grid-cols-2 gap-8">
-                    <div className="h-[400px] w-full bg-muted rounded-lg"></div>
-                    <div>
-                        <div className="h-10 w-3/4 bg-muted rounded-md"></div>
-                        <div className="h-6 w-1/4 bg-muted rounded-md mt-4"></div>
-                        <div className="h-20 w-full bg-muted rounded-md mt-4"></div>
-                        <div className="flex gap-4 mt-8">
-                            <div className="h-10 w-24 bg-muted rounded-md"></div>
-                            <div className="h-10 w-24 bg-muted rounded-md"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+      <div className="max-w-4xl mx-auto p-4 md:p-8">Loading...</div>
     );
   }
 
@@ -168,32 +174,35 @@ export default function FurnitureDetailPage() {
                   <Share2 className="h-4 w-4" />
                   Share with Carpenter
                 </Button>
-                <div className="flex w-full flex-col sm:flex-row gap-2">
-                    <Link href={`/furniture/${id}/edit`} passHref className="w-full">
-                        <Button variant="outline" className="w-full gap-2">
-                            <Edit className="h-4 w-4" /> Edit
-                        </Button>
-                    </Link>
-                    <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                            <Button variant="destructive" className="w-full gap-2">
-                            <Trash2 className="h-4 w-4" /> Delete
-                            </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                            <AlertDialogHeader>
-                            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the furniture item.
-                            </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
-                            </AlertDialogFooter>
-                        </AlertDialogContent>
-                    </AlertDialog>
-                </div>
+            {/* Only show Edit/Delete if user is a carpenter */}
+            {isCarpenter && (
+              <div className="flex w-full flex-col sm:flex-row gap-2">
+                <Link href={`/furniture/${id}/edit`} passHref className="w-full">
+                  <Button variant="outline" className="w-full gap-2">
+                    <Edit className="h-4 w-4" /> Edit
+                  </Button>
+                </Link>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button variant="destructive" className="w-full gap-2">
+                      <Trash2 className="h-4 w-4" /> Delete
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete the furniture item.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancel</AlertDialogCancel>
+                      <AlertDialogAction onClick={handleDelete}>Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            )}
               </CardFooter>
             </div>
           </div>
