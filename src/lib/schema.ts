@@ -1,13 +1,12 @@
+
 import { z } from 'zod';
 
-export const furnitureImageSchema = z.object({
-  url: z.string().url(),
-  hint: z.string(),
-});
-
 export const furnitureSchema = z.object({
-  name: z.string().min(3, { message: 'Name must be at least 3 characters long.' }),
-  description: z.string().min(10, { message: 'Description must be at least 10 characters long.' }),
-  images: z.array(furnitureImageSchema).min(1, { message: 'Please upload at least one image.' }),
-  category: z.string().min(3, { message: 'Category must be at least 3 characters long.' }),
+  name: z.string().min(1, 'Name is required'),
+  description: z.string().optional(),
+  images: z.array(z.object({
+    url: z.string().url(),
+    hint: z.string().optional(),
+  })).min(1, 'At least one image is required'),
+  category: z.string().min(1, 'Category is required'),
 });
