@@ -62,7 +62,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-[60vh] py-8 bg-muted">
+    <div className="flex justify-center items-center py-8  bg-transparent">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
