@@ -100,6 +100,26 @@ export default function FurnitureForm({ initialData }: FurnitureFormProps) {
   const handleImageChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      // Validate file size (max 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          variant: 'destructive',
+          title: 'Image Too Large',
+          description: 'Please select an image smaller than 2MB.',
+        });
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
+      // Validate file type (JPEG/PNG only)
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid File Type',
+          description: 'Only JPEG and PNG images are allowed.',
+        });
+        if (fileInputRef.current) fileInputRef.current.value = '';
+        return;
+      }
       setIsUploading(true);
       try {
         if (!storage) {
