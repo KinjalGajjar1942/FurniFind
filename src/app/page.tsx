@@ -1,10 +1,9 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
 import type { Furniture } from '@/lib/types';
 import { getAllFurniture } from '@/lib/firebase/client';
-import { useFirestore } from '@/firebase';
+import { useFirestore, useUser } from '@/firebase';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -23,6 +22,18 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const firestore = useFirestore();
+  const { user, isUserLoading } = useUser();
+  const [isCarpenter, setIsCarpenter] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      user.getIdTokenResult().then(idTokenResult => {
+        setIsCarpenter(idTokenResult.claims.role === 'carpenter');
+      });
+    } else {
+      setIsCarpenter(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!firestore) return;
@@ -69,11 +80,13 @@ export default function HomePage() {
           <p className="mt-4 text-lg md:text-xl text-primary-foreground/90 max-w-2xl mx-auto">
             Discover and share beautiful furniture designs with your carpenter.
           </p>
-          <Link href="/add" passHref>
-            <Button className="mt-8 gap-2" size="lg">
-              <Plus /> Add New Furniture
-            </Button>
-          </Link>
+          {!isUserLoading && isCarpenter && (
+            <Link href="/add" passHref>
+              <Button className="mt-8 gap-2" size="lg">
+                <Plus /> Add New Furniture
+              </Button>
+            </Link>
+          )}
         </motion.div>
       </header>
 
@@ -148,11 +161,13 @@ export default function HomePage() {
           <div className="text-center py-16">
             <h2 className="text-2xl font-semibold">No Furniture Found</h2>
             <p className="mt-2 text-muted-foreground">Start by adding some beautiful furniture pieces to your showcase.</p>
+            {!isUserLoading && isCarpenter && (
              <Link href="/add" passHref>
               <Button className="mt-6 gap-2">
                 <Plus /> Add Furniture
               </Button>
             </Link>
+            )}
           </div>
         )}
       </main>

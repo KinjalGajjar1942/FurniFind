@@ -4,6 +4,7 @@
 import { ai } from '@/ai/genkit';
 import { getStorage } from 'firebase-admin/storage';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 import { getFirebaseAdminApp } from '@/lib/firebase/server-config';
 import { headers } from 'next/headers';
 import { seedCategories } from '@/lib/seed';
@@ -48,9 +49,10 @@ export async function uploadImageAction(formData: FormData): Promise<string> {
 
   const supabase = createSupabaseAdmin();
   const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+  const filePath = `${uuidv4()}-${cleanFileName}`;
   const { data, error } = await supabase.storage
     .from('uploads')
-    .upload(`${uuidv4()}-${cleanFileName}`, file);
+    .upload(filePath, file);
 
   if (error) {
     console.error('Supabase upload error:', error);
@@ -116,4 +118,10 @@ export async function getCategoriesAction(): Promise<{ id: string; name: string 
     id: doc.id,
     name: doc.data().name as string,
   }));
+}
+
+export async function setCustomUserClaims(uid: string, claims: object) {
+  const app = getFirebaseAdminApp();
+  const auth = getAuth(app);
+  await auth.setCustomUserClaims(uid, claims);
 }

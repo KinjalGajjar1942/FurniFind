@@ -1,52 +1,22 @@
-
 'use client';
 
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Database, Wrench } from 'lucide-react';
-import { fixCorsAction, seedDataAction } from '@/app/actions';
-import { useToast } from '@/hooks/use-toast';
+import { LogIn, LogOut, UserPlus } from 'lucide-react';
+import { useAuth, useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 export default function Header() {
-  const { toast } = useToast();
-  const [isFixing, setIsFixing] = React.useState(false);
-  const [isSeeding, setIsSeeding] = React.useState(false);
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const router = useRouter();
 
-  const handleSeedData = async () => {
-    setIsSeeding(true);
-    const result = await seedDataAction();
-    if (result.success) {
-      toast({
-        title: 'Success!',
-        description: 'Categories have been seeded. You can now add furniture.',
-      });
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Seeding Failed',
-        description: result.message,
-      });
+  const handleSignOut = async () => {
+    if (auth) {
+      await auth.signOut();
+      router.push('/');
     }
-    setIsSeeding(false);
-  };
- 
-  const handleFixCors = async () => {
-    setIsFixing(true);
-    const result = await fixCorsAction();
-    if (result.success) {
-      toast({
-        title: 'Success!',
-        description: 'CORS policy updated. Please try uploading an image again.',
-      });
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'CORS Fix Failed',
-        description: result.message,
-      });
-    }
-    setIsFixing(false);
   };
 
   return (
@@ -57,16 +27,31 @@ export default function Header() {
             FurniFind
           </h1>
         </Link>
-        {/* <div className="flex items-center gap-4">
-           <Button onClick={handleSeedData} disabled={isSeeding} variant="outline" size="sm">
-            <Database className="mr-2 h-4 w-4" />
-            {isSeeding ? 'Seeding...' : 'Seed Categories'}
-          </Button>
-          <Button onClick={handleFixCors} disabled={isFixing} variant="outline" size="sm">
-            <Wrench className="mr-2 h-4 w-4" />
-            {isFixing ? 'Fixing...' : 'Fix CORS'}
-          </Button>
-        </div> */}
+        <div className="flex items-center gap-2">
+         {isUserLoading ? (
+            <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
+         ) : user ? (
+            <Button onClick={handleSignOut} variant="outline" size="sm">
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+         ) : (
+            <>
+              <Button asChild variant="ghost" size="sm">
+                <Link href="/login">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  Login
+                </Link>
+              </Button>
+              <Button asChild size="sm">
+                <Link href="/signup">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Sign Up
+                </Link>
+              </Button>
+            </>
+         )}
+        </div>
       </div>
     </header>
   );
